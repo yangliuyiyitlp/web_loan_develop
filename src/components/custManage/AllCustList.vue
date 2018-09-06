@@ -1,6 +1,6 @@
 <template>
  <div class="allCustList">
- 	<TitCommon :title='title'></TitCommon>
+ 	<!--<TitCommon :title='title'></TitCommon>-->
  	<div class="custListWrap">
  		<search
 
@@ -41,16 +41,19 @@
 
 <script>
 import api from "@/api/index"
+import pageSize from "@/api/myPageSize"
 import TitCommon from '@/components/common/TitCommon'
 import Pagination from '@/components/common/Pagination'
 import Search from '@/components/custManage/Search'
 import TableList from '@/components/custManage/TableList'
 import DialogOrderList from '@/components/custManage/dialog/DialogOrderList'
 import DialogFollow from '@/components/custManage/dialog/DialogFollow'
+
 export default {
-   	name: 'allList',
+   	name: "U_AllUserList",
   	data() {
 	  	return {
+	  		cName: '',
 	  		title: '全部客户',
 	  		currentPage:1,
 	  		total: 0,
@@ -95,13 +98,18 @@ export default {
 //		})
 //	},
 	created() {
-	 	if (JSON.parse(localStorage.getItem('myPageSize'))) {
-	 		this.pageSize = JSON.parse(localStorage.getItem('myPageSize')).W_AllUserList?JSON.parse(localStorage.getItem('myPageSize')).W_AllUserList:10
-	// 		console.log(JSON.parse(localStorage.getItem('myPageSize')).W_AllUserList)
-	 	} else {
-	 		let obj = {}
-	 		localStorage.setItem('myPageSize',JSON.stringify(obj))
-	 	}
+		this.cName = this.$route.meta.conpenentName
+		console.log(this.$route,"this.$routethis.$routethis.$route")
+    if( pageSize.getMyPageSize(this.pageSize)){
+      this.pageSize=pageSize.getMyPageSize(this.pageSize)
+    }
+	//  	if (JSON.parse(localStorage.getItem('myPageSize'))) {
+	//  		this.pageSize = JSON.parse(localStorage.getItem('myPageSize')).W_AllUserList?JSON.parse(localStorage.getItem('myPageSize')).W_AllUserList:10
+	// // 		console.log(JSON.parse(localStorage.getItem('myPageSize')).W_AllUserList)
+	//  	} else {
+	//  		let obj = {}
+	//  		localStorage.setItem('myPageSize',JSON.stringify(obj))
+	//  	}
 	// 	this.permissionBtnPowerFn(this.$route.query.menuId)
 
 	},
@@ -118,11 +126,10 @@ export default {
 	mounted() {
 	 	this.getDepartmentZtreeFn()
 	 	this.queryCustInfoData()
-
 	},
   methods: {
   	queryCustInfoData() {
-  		this.loadingTable = true
+      this.loadingTable = true
   		this.tableData = []
   		const pararms = {
   			currentModuleId: this.$route.query.menuId,
@@ -138,9 +145,16 @@ export default {
 			provId: this.serachPararms.applyProvince,
 			cityId: this.serachPararms.applyCity
   		}
+      let startDate = new Date()
+	  console.log('startDate',startDate);
+	  	
   		api.queryCustInfoData(pararms).then(res => {
+			  this.total = 0
+				this.tableData =[]
   			this.loadingTable = false
 			if(res.data.success) {
+        let endDate = new Date()
+        console.log('endDate',(endDate-startDate)/1000);
 				this.total = res.data.total
 				this.tableData = res.data.data
 			} else {
@@ -202,10 +216,14 @@ export default {
 //		console.log(row)
   	},
   	handleSizeChange(val) {
-		let myPageSize = JSON.parse(localStorage.getItem('myPageSize'))
-  		myPageSize.W_AllUserList = val
-	 	localStorage.setItem('myPageSize',JSON.stringify(myPageSize))
+      pageSize.setMyPageSize(val)
+
+      // let myPageSize = JSON.parse(localStorage.getItem('myPageSize'))
+  		// myPageSize.W_AllUserList = val
+	 	// localStorage.setItem('myPageSize',JSON.stringify(myPageSize))
 		this.pageSize = val
+      this.currentPage = 1
+      this.pageNo = 1
 		this.queryCustInfoData()
 	},
 	handleCurrentChange(val) {
@@ -366,8 +384,8 @@ export default {
 
  }
 </script>
-<style lang="less">
-	.allCustList {
+<style lang="less" scoped>
+	/*.allCustList {
 		.table-wrap {
 			padding-top: 20px;
 			.el-table th {
@@ -378,5 +396,5 @@ export default {
 			}
 		}
 
-	}
+	}*/
 </style>

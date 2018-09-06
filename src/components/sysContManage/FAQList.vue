@@ -1,6 +1,6 @@
 <template>
  <div class="allCustList">
- 	<TitCommon :title='title'></TitCommon>
+ 	<!--<TitCommon :title='title'></TitCommon>-->
  	<el-row  type="flex" >
 	  <el-col  class="searchbox">
 	  		<el-form :inline="true" :model="formInline" class="demo-form-inline">
@@ -29,12 +29,12 @@
 	  </el-col>
 	</el-row>
  	<div class="custListWrap">
- 		<div class="table-wrap mrtop20">
+ 		<div class="table-wrap resetTable">
  			<el-table
 		      :data="tableData"
 		      border
 		      style="width: 100%">
-		      <el-table-column type="index"  width="60" label="序号" align='center'></el-table-column>
+		      <el-table-column type="index"  width="80" label="序号" align='center'></el-table-column>
 		      <el-table-column
             align='center'
 		        :show-overflow-tooltip="true"
@@ -120,6 +120,7 @@
 				id="editor_id"  width="300px" :minHeight="100" :content="addForm.result"
 	            pluginsPath="static/kindEditor/plugins/"
               :items= 'item'
+              urlType='domain'
                :allowImageRemote=' false'
 	            :allowImageUpload='true'
 	            :loadStyleMode="false"
@@ -135,7 +136,7 @@
 	        </el-form-item>
 	        <el-form-item label="排序数字" prop="reorder"  >
 
-            <el-input :maxlength='9' v-model.trim="addForm.reorder"  @input='checkNumMin' class="reorderClass"></el-input>
+            <el-input :maxlength='9' v-model.trim="addForm.reorder"  @input='checkNumMin' class="reorderClass"></el-input>&nbsp;*数字越大排序越靠前
 	            <!--<el-input-number v-model="addForm.reorder"  :min="0" :max="999999999" label="描述文字"></el-input-number>-->
 	        </el-form-item>
 	    </el-form>
@@ -156,109 +157,144 @@
 </template>
 
 <script>
-import api from '@/api/index.js'
-import TitCommon from '@/components/common/TitCommon'
-import TableList from '@/components/custManage/TableList'
-import Pagination from '@/components/common/Pagination'
+import api from "@/api/index.js";
+import pageSize from "@/api/myPageSize";
+
+//import TitCommon from '@/components/common/TitCommon'
+import TableList from "@/components/custManage/TableList";
+import Pagination from "@/components/common/Pagination";
 export default {
-  name: 'allList',
+  name: "SYC_FAQList",
   data() {
-  	return {
-      item: ['source', '|', 'undo', 'redo', '|', 'cut', 'copy', 'paste',
-        'plainpaste', 'wordpaste', '|', 'justifyleft', 'justifycenter', 'justifyright',
-        'justifyfull', 'insertorderedlist', 'insertunorderedlist', 'indent', 'outdent', 'clearhtml', 'selectall', '|', 'fullscreen', '/',
-        'formatblock', 'fontname', 'fontsize', '|', 'forecolor', 'hilitecolor', 'bold',
-        'italic', 'underline', 'strikethrough', 'lineheight', 'removeformat', '|', 'image',
-        'table', 'hr'],
-  		buttonLoading:false,
-  		title: '常见问题',
-  		question_DialogVisible:false,
-  		link_DialogVisible:false,
-  		uploadUrl:'',
-  		currentPage:1,
-  		total: 1,
-  		pageNo: 1,
-        pageSize: 10,
-        tableData: [],
-        formInline:{
-        	question:'',
-        	status:''
+    return {
+      item: [
+        "source",
+        "|",
+        "undo",
+        "redo",
+        "|",
+        "cut",
+        "copy",
+        "paste",
+        "plainpaste",
+        "wordpaste",
+        "|",
+        "justifyleft",
+        "justifycenter",
+        "justifyright",
+        "justifyfull",
+        "insertorderedlist",
+        "insertunorderedlist",
+        "indent",
+        "outdent",
+        "clearhtml",
+        "selectall",
+        "|",
+        "fullscreen",
+        "/",
+        "formatblock",
+        "fontname",
+        "fontsize",
+        "|",
+        "forecolor",
+        "hilitecolor",
+        "bold",
+        "italic",
+        "underline",
+        "strikethrough",
+        "lineheight",
+        "removeformat",
+        "|",
+        "image",
+        "table",
+        "hr"
+      ],
+      buttonLoading: false,
+      title: "常见问题",
+      question_DialogVisible: false,
+      link_DialogVisible: false,
+      uploadUrl: "",
+      currentPage: 1,
+      total: 1,
+      pageNo: 1,
+      pageSize: 10,
+      tableData: [],
+      formInline: {
+        question: "",
+        status: ""
+      },
+      states: [
+        {
+          label: "全部",
+          value: ""
         },
-        states:[
-        	{
-        		label:'全部',
-        		value:''
-        	},
-        	{
-        		label:'有效',
-        		value:'1'
-        	},
-        	{
-        		label:'无效',
-        		value:'0'
-        	}
+        {
+          label: "有效",
+          value: "1"
+        },
+        {
+          label: "无效",
+          value: "0"
+        }
+      ],
+      states2: [
+        {
+          label: "请选择",
+          value: null
+        },
+        {
+          label: "有效",
+          value: "1"
+        },
+        {
+          label: "无效",
+          value: "0"
+        }
+      ],
+      addForm: {
+        data: "Q：",
+        result: "",
+        status: "",
+        reorder: ""
+      },
+      addForm_rules: {
+        data: [
+          { required: true, max: 50, message: "请输入标题", trigger: "blur" }
         ],
-        states2:[
-        	{
-        		label:'请选择',
-        		value:null
-        	},
-        	{
-        		label:'有效',
-        		value:'1'
-        	},
-        	{
-        		label:'无效',
-        		value:'0'
-        	}
+
+        status: [
+          { required: true, message: "请选择状态", trigger: "blur,change" }
         ],
-        addForm:{
-        	data:'Q：',
-			result:'',
-			status:'',
-			reorder:''
-        },
-        addForm_rules:{
-        	data:[
-	        		{required:true, max:50,message: '请输入标题', trigger: 'blur' }
-	        	],
-
-			status:[
-	        		{required:true, message: '请选择状态', trigger: 'blur,change' }
-	        	],
-	        result:[
-	        	{required:true, message: '请填写答案', trigger: 'blur' }
-	        ],
-			reorder:[
-	        		{required:true, message: '请输入序号', trigger: 'blur' }
-	        	]
-
-        },
-        dataArr:'',
-        imglink:'',
-        addModify_title:'',
-        uploadJson: ''
-  	}
+        result: [{ required: true, message: "请填写答案", trigger: "blur" }],
+        reorder: [{ required: true, message: "请输入序号", trigger: "blur" }]
+      },
+      dataArr: "",
+      imglink: "",
+      addModify_title: "",
+      uploadJson: ""
+    };
   },
-  created(){
-
-  	if (JSON.parse(localStorage.getItem('myPageSize'))) {
- 		this.pageSize = JSON.parse(localStorage.getItem('myPageSize')).W_FAQList?JSON.parse(localStorage.getItem('myPageSize')).W_FAQList:10
- 	} else {
- 		let obj = {}
- 		localStorage.setItem('myPageSize',JSON.stringify(obj))
- 	}
-  	this.uploadJson = api.etitorUpload()
+  created() {
+    if (pageSize.getMyPageSize(this.pageSize)) {
+      this.pageSize = pageSize.getMyPageSize(this.pageSize);
+    }
+    // if (JSON.parse(localStorage.getItem('myPageSize'))) {
+    // 	this.pageSize = JSON.parse(localStorage.getItem('myPageSize')).W_FAQList?JSON.parse(localStorage.getItem('myPageSize')).W_FAQList:10
+    // } else {
+    // 	let obj = {}
+    // 	localStorage.setItem('myPageSize',JSON.stringify(obj))
+    // }
+    this.uploadJson = api.etitorUpload();
   },
- mounted() {
- 	this.queryQuestionList()
- },
-  watch:{
-      // 'addForm.reorder': function (val, oldVal) {
-      //   if(typeof(val) != Number){
-      //     this.addForm.reorder=parseInt(val)
-      //   }
-      // }
+  mounted() {
+    this.queryQuestionList();
+  },
+  watch: {
+    // 'addForm.reorder': function (val, oldVal) {
+    //   if(typeof(val) != Number){
+    //     this.addForm.reorder=parseInt(val)
+    //   }
+    // }
     // addForm:{// 深度监视
     //   deep:true,
     //   handler:function(newV,oldV){
@@ -267,265 +303,278 @@ export default {
     //       // this.addForm.reorder=parseInt(this.addForm.reorder)
     //     }
     //   } }
-      },
-    methods: {
-      replceNumVal(keys,value) {
-        this.$nextTick(()=>{
-          this.addForm[keys] = value.replace(/[^0-9$]/g,'')
-        },20)
-      },
-      checkNumMin(value) {
-        this.replceNumVal('reorder',value)
-      },
-  	chenkNum(value) {
-		this.$nextTick(()=>{
-			this.addForm.reorder = value.replace(/[^0-9$]/g,'')
-		},20)
-	},
-  	queryQuestionList(){
-  		var params={
-  			pageNo:this.pageNo,
-  			pageSize:this.pageSize,
-  			data:this.formInline.question,
-  			status:this.formInline.status
-  		}
-  		api.queryQuestionList(params).then(res=>{
- 			console.log(res)
- 			if(res.data.code == 1){
- 				this.total = res.data.total;
- 				this.tableData = res.data.data
- 				console.log(this.tableData,'this.tableData')
- 			} else {
- 				this.$notify({
-		           title: '提示',
-		           message: res.data.msg,
-		           duration: 1500
-		        });
- 			}
- 		})
-  	},
-  	updateQuestion(){
-  		var params = {
-  			id:this.questionId,
-  			data:this.addForm.data,
-  			result:this.addForm.result,
-  			status:this.addForm.status,
-  			reorder:this.addForm.reorder
-  		}
-  		this.buttonLoading = true;
-  		api.updateQuestion(params).then(res=>{
-  			this.buttonLoading = false;
- 			console.log(res)
- 			if(res.data.code == 1){
- 				this.queryQuestionList()
- 				this.$message.success(res.data.msg);
- 				this.question_DialogVisible = false
- 			} else {
- 				this.$notify({
-		           title: '提示',
-		           message: res.data.msg,
-		           duration: 1500
-		        });
- 			}
-
- 		})
-  	},
-    onContentChange (val) {
-      this.addForm.result = val
-      console.log(val)
+  },
+  methods: {
+    replceNumVal(keys, value) {
+      this.$nextTick(() => {
+        this.addForm[keys] = value.replace(/[^0-9$]/g, "");
+      }, 20);
     },
-  	search(data) {
-  		this.pageNo = 1
-//		this.pageSize = 10
-  		this.queryQuestionList()
-  	},
-  	add(a){
-  		this.question_DialogVisible = true;
-		this.addModify_title = '新增问题';
-		this.questionId='';
-		this.addForm.reorder = ""
-		this.addForm.status = null
-  	},
-  	modify(a){
-  		console.log(a)
-  		a.status = a.status.toString()
-  		this.question_DialogVisible = true;
-  		this.addModify_title = '修改问题'
-  		this.questionId = a.id;
-  		console.log(a,this.questionId,'questionId')
-  		this.addForm = Object.assign(this.addForm,a)
-  		console.log(this.addForm,'this.addForm')
-  	},
-  	openLink(link){
-		this.link_DialogVisible = true;
-		this.imglink = link;
-  	},
-  	cancel_lookLink(){
-  		this.link_DialogVisible = false;
-  		this.imglink = '';
-  	},
-  	delete_s(row){
-  		this.$confirm('确认删除吗？', '提示', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning',
-          closeOnClickModal: false
-        }).then(() => {
-        	api.updateQuestion({
-	    		id:row.id,
-				status:0
-	    	}).then(res=>{
-	// 			console.log(res)
-	 			if(res.data.code == 1){
-	 				this.queryQuestionList()
-	 				this.$message.success(res.data.msg);
-	 			}else{
-	 				this.$message.error(res.data.msg)
-	 			}
-	// 			this.buttonLoading = true;
-	// 			this.banner_DialogVisible = false;
-	 		})
-        }).catch(() => {
+    checkNumMin(value) {
+      this.replceNumVal("reorder", value);
+    },
+    chenkNum(value) {
+      this.$nextTick(() => {
+        this.addForm.reorder = value.replace(/[^0-9$]/g, "");
+      }, 20);
+    },
+    queryQuestionList() {
+     
+      var params = {
+        pageNo: this.pageNo,
+        pageSize: this.pageSize,
+        data: this.formInline.question,
+        status: this.formInline.status
+      };
+      api.queryQuestionList(params).then(res => {
+         this.total = 0;
+      this.tableData = [];
+        console.log(res);
+        if (res.data.code == 1) {
+          this.total = res.data.total;
+          this.tableData = res.data.data;
+          console.log(this.tableData, "this.tableData");
+        } else {
+          this.$notify({
+            title: "提示",
+            message: res.data.msg,
+            duration: 1500
+          });
+        }
+      });
+    },
+    updateQuestion() {
+      var params = {
+        id: this.questionId,
+        data: this.addForm.data,
+        result: this.addForm.result,
+        status: this.addForm.status,
+        reorder: this.addForm.reorder
+      };
+      this.buttonLoading = true;
+      api.updateQuestion(params).then(res => {
+        this.buttonLoading = false;
+        console.log(res);
+        if (res.data.code == 1) {
+          this.queryQuestionList();
+          this.$message.success(res.data.msg);
+          this.question_DialogVisible = false;
+        } else {
+          this.$notify({
+            title: "提示",
+            message: res.data.msg,
+            duration: 1500
+          });
+        }
+      });
+    },
+    onContentChange(val) {
+      this.addForm.result = val;
+      console.log(val);
+    },
+    search(data) {
+      this.pageNo = 1;
+      this.currentPage = 1;
+      //		this.pageSize = 10
+      this.queryQuestionList();
+    },
+    add(a) {
+      this.question_DialogVisible = true;
+      this.addModify_title = "新增问题";
+      this.questionId = "";
+      this.addForm.reorder = "";
+      this.addForm.status = null;
+    },
+    modify(a) {
+      console.log(a);
+      a.status = a.status.toString();
+      this.question_DialogVisible = true;
+      this.addModify_title = "修改问题";
+      this.questionId = a.id;
+      console.log(a, this.questionId, "questionId");
+      this.addForm = Object.assign(this.addForm, a);
+      console.log(this.addForm, "this.addForm");
+    },
+    openLink(link) {
+      this.link_DialogVisible = true;
+      this.imglink = link;
+    },
+    cancel_lookLink() {
+      this.link_DialogVisible = false;
+      this.imglink = "";
+    },
+    delete_s(row) {
+      this.$confirm("确认删除吗？", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning",
+        closeOnClickModal: false
+      })
+        .then(() => {
+          api
+            .updateQuestion({
+              id: row.id,
+              status: 0
+            })
+            .then(res => {
+              // 			console.log(res)
+              if (res.data.code == 1) {
+                this.queryQuestionList();
+                this.$message.success(res.data.msg);
+              } else {
+                this.$message.error(res.data.msg);
+              }
+              // 			this.buttonLoading = true;
+              // 			this.banner_DialogVisible = false;
+            });
+        })
+        .catch(() => {
           this.$message({
-            type: 'info',
-            message: '已取消删除'
+            type: "info",
+            message: "已取消删除"
           });
         });
-  	},
-  	before_upload(files) {
-    	const isLt2M = files.size / 1024 / 1024 < 3;
-    	if (!isLt2M) {
-	        this.$message.error('单个文件不可超过3 MB!');
-	        return false
-	    }else{
-	    	this.dataArr.push(files.name)
-	    }
-    	console.log(files.name)
     },
-  	activityNameFn(value){
-		this.$nextTick(()=>{
-			this.addForm.bannerName = value.replace(/[^\u4e00-\u9fa5a-zA-Z0-9]{0,50}/g,'')
-		},20)
-	},
-  	handleSizeChange(val) {
-
-  		let myPageSize = JSON.parse(localStorage.getItem('myPageSize'))
-  		myPageSize.W_FAQList = val
-	 	localStorage.setItem('myPageSize',JSON.stringify(myPageSize))
-		this.pageSize = val
-		this.queryQuestionList();
-
-		console.log(val,777777777777)
-	},
-	handleCurrentChange(val) {
-		this.pageNo = val
-		this.currentPage = val
-		this.queryQuestionList();
-//		console.log(val,88888888)
-	},
-	handleAvatarSuccess(){
-
-	},
-	beforeAvatarUpload(){
-
-	},
-	confirm_add(addForm){
-		this.$refs[addForm].validate((valid) => {
-            if (valid) {
-            	console.log(666)
-
-            	this.updateQuestion()
-            }else {
-	            return false;
-	        }
-		})
-	},
-	addDiaClose(){
-		// console.log("addDiaClose=====")
-		Object.assign(this.addForm,{
-  			data:'Q：',
-			result:'',
-			status:'',
-			reorder:''
-  		})
-  		this.$nextTick(()=>{
-  			this.$refs.addForm.clearValidate();
-  		})
-	},
-	cancel_addModify(){
-		this.question_DialogVisible = false;
-		this.$refs['addForm'].resetFields();
-	},
-	goNewPage(a){ //跳转页面
-    	var newWin = window.open('loading page');
-    	 //newWin.location.href = baseURL + '/#/activity_mobile'
-    	 newWin.location.href = a;
+    before_upload(files) {
+      const isLt2M = files.size / 1024 / 1024 < 3;
+      if (!isLt2M) {
+        this.$message.error("单个文件不可超过3 MB!");
+        return false;
+      } else {
+        this.dataArr.push(files.name);
+      }
+      console.log(files.name);
     },
-    copyLink(a){ //复制地址
-    	//window.clipboardData.setData("Text",a);
-    	var Url2=document.getElementById(a);
-		Url2.select(); // 选择对象
-		console.log(Url2);
-		document.execCommand("Copy");
+    activityNameFn(value) {
+      this.$nextTick(() => {
+        this.addForm.bannerName = value.replace(
+          /[^\u4e00-\u9fa5a-zA-Z0-9]{0,50}/g,
+          ""
+        );
+      }, 20);
     },
-    viewH5(){
-    	var routeData = this.$router.resolve({
-        	path: '/questions',
-      	});
-      	window.open(routeData.href);
+    handleSizeChange(val) {
+      pageSize.setMyPageSize(val);
+
+      // let myPageSize = JSON.parse(localStorage.getItem('myPageSize'))
+      // myPageSize.W_FAQList = val
+      // localStorage.setItem('myPageSize',JSON.stringify(myPageSize))
+      this.pageSize = val;
+      this.pageNo = 1;
+      this.currentPage = 1;
+      this.queryQuestionList();
+
+      console.log(val, 777777777777);
+    },
+    handleCurrentChange(val) {
+      this.pageNo = val;
+      this.currentPage = val;
+      this.queryQuestionList();
+      //		console.log(val,88888888)
+    },
+    handleAvatarSuccess() {},
+    beforeAvatarUpload() {},
+    confirm_add(addForm) {
+      this.$refs[addForm].validate(valid => {
+        if (valid) {
+          console.log(666);
+
+          this.updateQuestion();
+        } else {
+          return false;
+        }
+      });
+    },
+    addDiaClose() {
+      // console.log("addDiaClose=====")
+      Object.assign(this.addForm, {
+        data: "Q：",
+        result: "",
+        status: "",
+        reorder: ""
+      });
+      this.$nextTick(() => {
+        this.$refs.addForm.clearValidate();
+      });
+    },
+    cancel_addModify() {
+      this.question_DialogVisible = false;
+      this.$refs["addForm"].resetFields();
+    },
+    goNewPage(a) {
+      //跳转页面
+      var newWin = window.open("loading page");
+      //newWin.location.href = baseURL + '/#/activity_mobile'
+      newWin.location.href = a;
+    },
+    copyLink(a) {
+      //复制地址
+      //window.clipboardData.setData("Text",a);
+      var Url2 = document.getElementById(a);
+      Url2.select(); // 选择对象
+      console.log(Url2);
+      document.execCommand("Copy");
+    },
+    viewH5() {
+      var routeData = this.$router.resolve({
+        path: "/questions"
+      });
+      window.open(routeData.href);
     }
   },
   components: {
-  	TitCommon,
-  	TableList,
-  	Pagination
+    //	TitCommon,
+    TableList,
+    Pagination
   }
-
- }
+};
 </script>
 <style  lang="less" >
-  .reorderClass .el-input__inner{
-    width:206px;
+.reorderClass {
+  width: 206px;
+  float: left;
+}
+.reorderClass .el-input__inner {
+  width: 206px;
+}
+.my_upload {
+  .avatar-uploader .el-upload {
+    border: 1px dashed #d9d9d9;
+    border-radius: 6px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
   }
-  .my_upload{
-  	.avatar-uploader .el-upload {
-	    border: 1px dashed #d9d9d9;
-	    border-radius: 6px;
-	    cursor: pointer;
-	    position: relative;
-	    overflow: hidden;
-	  }
-	  .avatar-uploader .el-upload:hover {
-	    border-color: #409EFF;
-	  }
-	  .avatar-uploader-icon {
-	    font-size: 28px;
-	    color: #8c939d;
-	    width: 178px;
-	    height: 178px;
-	    line-height: 178px;
-	    text-align: center;
-	  }
-	  .avatar {
-	    width: 178px;
-	    height: 178px;
-	    display: block;
-	  }
+  .avatar-uploader .el-upload:hover {
+    border-color: #409eff;
   }
-  .el-popover {
-  	img{
-  		width: 100%;
-  	}
+  .avatar-uploader-icon {
+    font-size: 28px;
+    color: #8c939d;
+    width: 178px;
+    height: 178px;
+    line-height: 178px;
+    text-align: center;
   }
-  .hidden_input{
-  	position: absolute;
-	top:-99999px;
-	left: -99999px;
-	z-index: -99999;
+  .avatar {
+    width: 178px;
+    height: 178px;
+    display: block;
   }
+}
+.el-popover {
+  img {
+    width: 100%;
+  }
+}
+.hidden_input {
+  position: absolute;
+  top: -99999px;
+  left: -99999px;
+  z-index: -99999;
+}
 //    .ke-container {
 
 //     width: 100% !important;
 // }
-
 </style>

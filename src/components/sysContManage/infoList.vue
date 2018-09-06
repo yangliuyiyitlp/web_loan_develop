@@ -1,6 +1,6 @@
 <template>
   <div class="allCustList table-wraps">
-    <TitCommon :title='title'></TitCommon>
+    <!--<TitCommon :title='title'></TitCommon>-->
     <el-row  type="flex" >
       <el-col  class="searchbox">
         <el-form :inline="true" :model="formInline" class="demo-form-inline">
@@ -49,12 +49,12 @@
       </el-col>
     </el-row>
     <div class="custListWrap">
-      <div class="table-wrap mrtop20">
+      <div class="table-wrap resetTable">
         <el-table
           :data="tableData"
           border
           style="width: 100%">
-          <el-table-column align='center' type="index"  width="60" label="序号" >
+          <el-table-column align='center' type="index"  width="80" label="序号" >
 
           </el-table-column>
           <el-table-column
@@ -135,11 +135,13 @@
 
 <script>
   import api from '@/api/index.js'
-  import TitCommon from '@/components/common/TitCommon'
+  import pageSize from "@/api/myPageSize"
+
+//import TitCommon from '@/components/common/TitCommon'
   import TableList from '@/components/custManage/TableList'
   import Pagination from '@/components/common/Pagination'
   export default {
-    name: 'infoList',
+    name: 'SYC_InfoList',
     data() {
       return {
         buttonLoading:false,
@@ -156,7 +158,7 @@
         pageSize: 10,
         tableData: [],
         formInline:{
-          detailCode:null
+          "detailCode": null
         },
         states:[{
           "id": "99999999",
@@ -168,13 +170,16 @@
           "name": "请选择通知类型",
           "detailCode": null
         }],
-        addForm:{},
+        addForm:{
+          detailCode:null,
+          pushContent:''
+        },
         addForm_rules:{
           detailCode:[
-            {required:true, max:50,message: '请选择通知类型', trigger: 'change' }
+            {required:true, max:50,message: '请选择通知类型', trigger: 'blur' }
           ],
           pushContent:[
-            {required:true, message: '请录入发送消息', trigger: 'blur' },
+            {required:true, message: '请录入发送消息', trigger: 'change' },
             { min: 1, max: 200, message: '超过最大长度', trigger: 'blur' }
           ]
         },
@@ -184,16 +189,20 @@
       }
     },
     created() {
-      if (JSON.parse(localStorage.getItem('myPageSize'))) {
-        this.pageSize = JSON.parse(localStorage.getItem('myPageSize')).infoList?JSON.parse(localStorage.getItem('myPageSize')).infoList:10
-        console.log(JSON.parse(localStorage.getItem('myPageSize')).infoList)
-      } else {
-        let obj = {}
-        localStorage.setItem('myPageSize',JSON.stringify(obj))
+      if( pageSize.getMyPageSize(this.pageSize)){
+        this.pageSize=pageSize.getMyPageSize(this.pageSize)
       }
+
+      // if (JSON.parse(localStorage.getItem('myPageSize'))) {
+      //   this.pageSize = JSON.parse(localStorage.getItem('myPageSize')).infoList?JSON.parse(localStorage.getItem('myPageSize')).infoList:10
+      //   console.log(JSON.parse(localStorage.getItem('myPageSize')).infoList)
+      // } else {
+      //   let obj = {}
+      //   localStorage.setItem('myPageSize',JSON.stringify(obj))
+      // }
     },
     mounted(){
-      this.queryStatus()
+      this.queryDictionary();
       this.queryInfoList();
     },
     methods: {
@@ -224,9 +233,12 @@
         this.number = parseInt(200 - len);
       },
       handleSizeChange(val) {
-        let myPageSize = JSON.parse(localStorage.getItem('myPageSize'))
-        myPageSize.infoList = val
-        localStorage.setItem('myPageSize',JSON.stringify(myPageSize))
+        this.pageNo = 1
+        this.currentPage = 1
+        pageSize.setMyPageSize(val)
+        // let myPageSize = JSON.parse(localStorage.getItem('myPageSize'))
+        // myPageSize.infoList = val
+        // localStorage.setItem('myPageSize',JSON.stringify(myPageSize))
         this.pageSize = val
         this.queryInfoList();
 
@@ -236,26 +248,22 @@
         this.currentPage = val
         this.queryInfoList();
       },
-      queryStatus(){
-        api.queryPageDictionary().then(res=>{
-          if(res.data.success && res.data.data){
-            for (var i=0; i < res.data.data.length;i++) {
-               if(res.data.data[i].name=='通知类型'){
-                 let code= res.data.data[i].code
-                 this.queryDictionary(code)
-               }
-            }
-          } else {
-            this.$notify({
-              title: '提示',
-              message: res.data.msg,
-              duration: 1500
-            });
-          }
-        })
-      },
+      // queryStatus(){
+      //   api.queryPageDictionary({name:'通知类型'}).then(res=>{
+      //     if(res.data.success && res.data.data[0]){
+      //       let code= res.data.data[0].code
+      //       this.queryDictionary(code)
+      //     } else {
+      //       this.$notify({
+      //         title: '提示',
+      //         message: res.data.msg,
+      //         duration: 1500
+      //       });
+      //     }
+      //   })
+      // },
       queryDictionary(code){
-        api.queryPageDictionaryDetail({code:code,status:1}).then(res=>{
+        api.queryAllDetailOrder({code:'000006',status:1}).then(res=>{
           console.log(111,res)
           if(res.data.success){
             for (var i=0; i < res.data.data.length;i++) {
@@ -320,7 +328,10 @@
           endTime:this.formInline.endTime,
           typeCode:this.formInline.detailCode
         }
+        
         api.queryInfoList(pararms).then(res=>{
+          this.total = 0;
+            this.tableData =[]
           console.log(res)
           if(res.data.code == 1){
             this.total = res.data.total;
@@ -353,6 +364,7 @@
             api.infoListAddPushMsg({
               pushContent:this.addForm.pushContent,
               typeCode:this.addForm.detailCode,
+              sendNum:1 //推送标识(1:后台推送 2:app推送)"
             }).then(res=>{
               this.buttonLoading = false;
               if(res.data.success){
@@ -371,12 +383,12 @@
       addDiaClose(){
         Object.assign(this.addForm,{
           pushContent:'',
-          detailCode:''
+          detailCode:null
         })
         // this.showTip = false
         this.number=200
         this.$nextTick(()=>{
-          this.$refs.addForm.clearValidate();
+          this.$refs.addForm.resetFields();
         })
       },
       cancel_addModify(){
@@ -388,7 +400,7 @@
     },
 
     components: {
-      TitCommon,
+//    TitCommon,
       TableList,
       Pagination
     }

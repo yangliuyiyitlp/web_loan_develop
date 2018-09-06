@@ -7,6 +7,9 @@ export default{
   [types.GET_CONTROL_DATA](state,newData) {
     state.controlArr = newData
   },
+  [types.GET_REFUSE_BTN](state,newData) {
+    state.isRefuse = newData
+  },
 	[types.GET_POWER_BTN_ARR](state,newData) {
 		state.powerBtnArr = newData
 //		console.log(newData,'-=-=--=-=-')

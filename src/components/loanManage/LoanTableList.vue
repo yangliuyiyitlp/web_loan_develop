@@ -1,14 +1,17 @@
 <template>
-  <div class="tableList">
+  <div class="tableList resetTable">
       <el-table
         v-loading="loadingTable"
         stripe
         :data="tableData"
         border
         style="width: 100%"
+        :cell-class-name="cell"
         @selection-change="handleSelectionChange"
       >
-      <el-table-column align='center' type="index"  width="60" label="序号" ></el-table-column>
+      <el-table-column align='center' type="index"  width="60" label="序号" >
+          <template  slot-scope="scope"><span :class="scope.row.monitoringStatus=='0'?'monitoringStatus':'monitoringNull'">{{scope.$index+1}}</span></template>
+      </el-table-column>
       <el-table-column
         prop="id"
         v-if="0" >
@@ -37,16 +40,19 @@
           align='center'
           :show-overflow-tooltip="true"
           prop="custName"
+          width="100"
           label="借款人姓名">
-          <template  slot-scope="scope"><span :class="scope.row.monitoringStatus=='0'?'monitoringStatus':'monitoringNull'">{{scope.row.custName}}</span></template>
+          <!-- <template  slot-scope="scope"><span :class="scope.row.monitoringStatus=='0'?'monitoringStatus':'monitoringNull'">{{scope.row.custName}}</span></template> -->
         </el-table-column>
       <el-table-column
+        width="100"
         align='center'
         :show-overflow-tooltip="true"
         prop="custMobile"
-        label="手机号">
+        label="手机号码">
       </el-table-column>
       <el-table-column
+        width="100"
         align='center'
         :show-overflow-tooltip="true"
         prop="custIc"
@@ -87,7 +93,9 @@
         align='center'
         :show-overflow-tooltip="true"
         prop="contractMoney"
-        label="合同金额（元）">
+        label="合同金额（元）"
+        width="120"
+        >
       </el-table-column>
       <el-table-column
         align='center'
@@ -105,6 +113,7 @@
         align='center'
         :show-overflow-tooltip="true"
         prop="currentRepaymentTime"
+        width="100"
         label="本期还款日">
       </el-table-column>
       <el-table-column
@@ -118,17 +127,18 @@
           v-if="showRepaymentDay "
           align='center'
           :show-overflow-tooltip="true"
-          prop="repaymentDay "
+          prop="repaymentDay"
           label="距还款日">
         </el-table-column>
         <el-table-column
           v-if="showOverdueDay"
           align='center'
           :show-overflow-tooltip="true"
-          prop="overdueDay "
+          prop="voerdueStatus"
           label="逾期天数">
         </el-table-column>
       <el-table-column
+      fixed="right"
         align='center'
         :show-overflow-tooltip="true"
         prop="date"
@@ -145,10 +155,11 @@
         </template>
       </el-table-column>
       <el-table-column
+      fixed="right"
         align='center'
         :show-overflow-tooltip="true"
         prop="date"
-        label="订单详细">
+        label="订单详情">
         <template slot-scope="scope">
           <!--v-if="scope.row.newData == 1"-->
           <el-button
@@ -182,7 +193,7 @@
         type: Boolean,
         default: true
       },
-      showDemoCom: {//todo 是否要显示列表的催收结构
+      showDemoCom: {//是否要显示列表的催收机构
         type: Boolean,
         default: false
       },
@@ -193,7 +204,8 @@
       showRepaymentDay:{//是否要显示列表的距还款日
         type: Boolean,
         default: false
-      }
+      },
+      minitorList:false
     },
     data() {
       return {
@@ -202,6 +214,12 @@
       }
     },
     methods: {
+       cell({row, column, rowIndex, columnIndex}) {
+      //放款监测 检测异常的标红
+        if(row.monitoringStatus=='0' && this.minitorList){
+          return 'monitoringStatus'
+        }
+       },
       forWard(row){ //查看
         this.$emit('forWard',row)
       },
@@ -222,9 +240,9 @@
 
   }
 </script>
-<style scoped lang="less">
+<style lang="less">
 .monitoringStatus{
-  color:red
+  color:red;
 }
 .monitoringNull{
     color:#000;

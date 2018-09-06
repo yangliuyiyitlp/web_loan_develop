@@ -43,7 +43,7 @@
 	      }
 		},
 		created() {
-			
+
 		},
 		methods: {
 		    handleSizeChange(val) {//每页要显示的条数

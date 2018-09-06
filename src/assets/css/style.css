@@ -1,4 +1,9 @@
 @charset "utf-8";
+html,body {
+
+	-webkit-user-select: text !important;
+    user-select: text !important;
+}
 .icons {
 	display: inline-block;
 	width: 22px;
@@ -8,18 +13,18 @@
 	display: inline-block;
 	width: 22px;
 	height: 22px;
-	background: url(../images/icon/cust.png) no-repeat 0 0;
+	background: url(../images/icon/menu-icon.png) no-repeat 0 0;
 	background-size: 100%;
 	background-size: 100%;
     vertical-align: middle;
     margin-top: -5px;
     margin-right: 5px;
 }
-.order-icon {
+/*.order-icon {
 	display: inline-block;
 	width: 22px;
 	height: 22px;
-	background: url(../images/icon/order.png) no-repeat 0 0;
+	background: url(../images/icon/menu-icon.png) no-repeat 0 0;
 	background-size: 100%;
 	background-size: 100%;
     vertical-align: middle;
@@ -30,7 +35,7 @@
 	display: inline-block;
 	width: 22px;
 	height: 22px;
-	background: url(../images/icon/loan.png) no-repeat 0 0;
+	background: url(../images/icon/menu-icon.png) no-repeat 0 0;
 	background-size: 100%;
 	background-size: 100%;
     vertical-align: middle;
@@ -41,7 +46,7 @@
 	display: inline-block;
 	width: 22px;
 	height: 22px;
-	background: url(../images/icon/more.png) no-repeat 0 0;
+	background: url(../images/icon/menu-icon.png) no-repeat 0 0;
 	background-size: 100%;
 	background-size: 100%;
     vertical-align: middle;
@@ -50,20 +55,31 @@
 }
 .systerm-icon {
 	display: inline-block;
-	width: 20px;
-	height: 20px;
-	background: url(../images/icon/systerm.png) no-repeat 0 0;
+	width: 22px;
+	height: 22px;
+	background: url(../images/icon/menu-icon.png) no-repeat 0 0;
 	background-size: 100%;
 	background-size: 100%;
     vertical-align: middle;
     margin-top: -3px;
     margin-right: 5px;
 }
+.customerService{
+  display: inline-block;
+  width: 22px;
+  height: 22px;
+  background: url(../images/icon/menu-icon.png) no-repeat 0 0;
+  background-size: 100%;
+  background-size: 100%;
+  vertical-align: middle;
+  margin-top: -3px;
+  margin-right: 5px;
+}*/
 .borBot1px {
 	    border-bottom: 1px solid #cccc;
 }
 .pad20 {
-	padding: 20px;    	
+	padding: 20px;
 }
 .alignCen {
 	text-align: center;
@@ -95,11 +111,11 @@
 	margin-top: 20px;
 }
 .highLight{
-	color: #31AFFF 
+	color: #31AFFF
 }
 .highLight_cursor{
 	cursor: pointer;
-	color: #31AFFF 
+	color: #31AFFF
 }
 .edit .ke-container {
 
@@ -112,11 +128,84 @@
 	text-align: right;
 }
 .btn-color {
-	color: #409eff;
+	color: #02abff;
 }
 .padTop20 {
 	padding-top: 30px;
 }
+.padTop20 .el-row {
+	/*margin-top: -30px;*/
+	line-height: 2;
+}
 .overDate .el-input{
 	width: 165px;
+}
+.resetTable .el-table th {
+	    padding: 0;
+}
+.resetTable .el-table td{
+	padding: 0 0;
+}
+.resetTable  .el-table .cell {
+    line-height: 38px;
+    height: 38px;
+}
+.resetTable_s .el-table td{
+	padding: 0px 0;
+}
+.resetTable_s .el-table th {
+	    padding: 7px 0 8px;
+}
+.table-wrap {
+	padding-top: 20px;
+}
+.control-wrap .reasons .el-form-item {
+    width: 49%;
+	float: left;
+}
+.control-wrap .reasons .el-form-item:last-child {
+	margin-left: 1%;
+
+}
+.followColor {
+	color: #02abff;
+}
+.el-table td {
+	font-size: 12px;
+}
+.allCustList .el-form-item {
+	    margin-bottom: 20px;
+}
+.custumer-wrap {
+	    margin-top: -10px;
+	    padding-bottom: 2px;
+}
+.custumer-wrap .el-form-item {
+	    margin-bottom: 0px;
+}
+.marBot15 {
+	    margin-bottom: 15px !important;
+}
+.fs12 {
+	font-size: 12px;
+}
+.g20 .order-search .seniorSearch {
+	top: 60px !important;
+	border-top: 1px solid #ccc !important;
+}
+.el-loading-mask {
+	z-index: 1992;
+}
+.wid50 {
+	width: 50%;
+}
+.blueColor {
+	color: blue;
+}
+.btncursor{
+	cursor: pointer
+}
+.cube-pullup-wrapper .before-trigger {
+	    font-size: 9px;
+    color: #5f5d5d;
 }

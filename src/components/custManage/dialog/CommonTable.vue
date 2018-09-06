@@ -7,7 +7,7 @@
 		    	label="序号"
 		      	type="index"
 		      	align='center'
-		      	width="50">
+		      	width="80">
 	    	</el-table-column>
 		    <el-table-column prop="cptName" label="产品系列" align='center'>
 		    </el-table-column>

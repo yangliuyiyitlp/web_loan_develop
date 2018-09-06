@@ -14,6 +14,8 @@ var state={
 	//选中表格数据的某几条数据
   selectArr: [],
   powerBtnArr:[], //按钮权限
+  isRefuse: false,
+  controlArr: []
 //menuId: null
 }
 

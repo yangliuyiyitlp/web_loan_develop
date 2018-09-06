@@ -20,6 +20,7 @@ export default {
 //		}
 	},
 	created(){
+//  console.log(22);
 //		var userinfo=null
 //		if(userinfo=localStorage.getItem("userinfo")){
 //			userinfo=JSON.parse(userinfo)

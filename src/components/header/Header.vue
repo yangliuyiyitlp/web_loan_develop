@@ -11,10 +11,10 @@
     				<transition-group name="list" tag="div">
 	    				<div class="router_list" :key='index' v-if="showObj['show' + (index+1)]">
 			    			<div class="cust-wrap">
-			    				<ul class="clearfix" v-if='item.list.length != 0'>
+			    				<ul class="clearfix" v-if='item.list.length != 0 && item.list'>
 			    					<li class='' v-for ='(val,ind) in item.list' :key='ind'>
 			    						<div class="tit"><i :class="val.icon"></i>{{val.name}}</div>
-			    						<div v-if='val.list.length != 0' class="clearfix">
+			    						<div v-if='val.list.length != 0 && val.list' class="clearfix">
 			    							<div class="routerItem"
 			    								v-for = "(valChild,indChild) in val.list" :key='indChild'>
 
@@ -32,6 +32,19 @@
     		</ul>
     	</div>
     	<div class="rt head-rt">
+	        <span class="isInLine" @click="goInline" slot="reference" v-if="isCustomer">
+	            <i class="circle"></i>
+	            <span class="isStatus" >{{isStatus}}</span>
+	            <span class="bottom" >
+	         		<i class="bottom-arrow1"></i>
+	         		<i class="bottom-arrow2"></i>
+	            </span>
+				<div class="setOnline" v-show="isInLine" >
+					<!--{{nowStatus}}-->
+					<p :class="{ activeLine: isActive}"  @click.stop="setOnLine(1)" ><i class="inLine line_s1" ></i>在线</p>
+					<p :class="{ activeLine_s: isActive_s}" @click.stop="setOnLine(0)"><i class="outLine line_s2"   ></i>离线</p>
+				</div>
+	        </span>
     		<span class="admin-wrap">
 					<!--<el-popover
 					  placement="bottom"
@@ -42,43 +55,52 @@
 					  </div>
 					  <i class="" slot="reference"></i>
 					</el-popover>-->
-					<i class=""></i>
-    			管理员，您好！
+				<i class=""></i>
+    			{{loginName}}，您好！
     		</span>
-    		<span class="login-out" @click="loginOut">
-    			<i class=""></i>
+    		<span class="login-out" @click.stop='loginOut' >
+    		<i class=""></i>
     			退出登录
+
     		</span>
     	</div>
     </div>
-	  <div class="tagViews">
+	  <!--<div class="tagViews">
 			<tag-views></tag-views>
-	  </div>
+	  </div>-->
 	  <modify-pass-word :dialogPassVisible = 'dialogPassVisible'></modify-pass-word>
   </div>
 </template>
 
 <script>
-	import TagViews from '@/components/TagViews'
+  import TagViews from '@/components/TagViews'
 	import ModifyPassWord from '@/components/header/ModifyPassWord'
   import api from "@/api/index"
+  import { baseURL } from '@/api/config.js'
 
   export default {
 	  data () {
 	    return {
+        isCustomer:true,
+	    	isActive: true,
+	    	isActive_s:false,
 	    	visiblePassWord: false,
-	      show: false,
-	      show2: false,
-	      show3: false,
-	      showObj : {
-	      	show1: false,
+		      show: false,
 		      show2: false,
 		      show3: false,
-	      },
-	      dialogPassVisible: {
-	      	outerVisible: false,
-	        innerVisible: false
-	      }
+		      showObj : {
+		      	show1: false,
+			      show2: false,
+			      show3: false,
+		      },
+		      dialogPassVisible: {
+		      	outerVisible: false,
+		        innerVisible: false
+		      },
+	        isInLine:false,
+	        isStatus:'',
+	        nowStatus:'',
+        loginName:''
 	    }
 	  },
 	  props: {
@@ -89,17 +111,124 @@
 	      }
 	  	}
 	  },
+
+    mounted(){
+	    this.queryLoginInName() // 获取登录人姓名
+	    // 进页面的初始值
+	   //  this.isStatus='在线'
+      // $('.circle').addClass('inLine')
+      this.updateCustomerStatus(null)
+
+    },
 	  methods: {
-	    // todo 退出
+      queryLoginInName(){
+        api.queryLoginName().then((res) => {
+         this.loginName = res.data
+      })
+      },
+	    // 退出
       loginOut(){
-        api.queryMyLogout().then(res => {
-         // this.$router.push({path:'/login'})
+      	this.$confirm('您将退出系统, 是否继续?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          closeOnClickModal:false,
+          type: 'warning'
+       }).then(() => {        	
+//      	console.log(api.queryMyLogout,"api.queryMyLogout")        	
+//        window.location.href = api.queryMyLogout
+//        setTimeout(()=>{
+//        	window.location.reload()
+//        },1000)
+//        debugger
+          window.location.href= baseURL + "/logout"
+           setTimeout(()=>{
+          	window.location.reload()
+          },1000)
+//      	debugger
+//      	console.log(baseURL + "/sys/logout")
+        }).catch(() => {
+        	debugger
+          this.$message({
+            type: 'info',
+            message: '取消退出'
+          });
+        });
+
+//      window.location.reload()
+      },
+      goInline(){// 在线 离线
+        if(this.isInLine){
+          this.isInLine =false
+        }else{
+          this.isInLine = true
+        }
+        if(this.isStatus=='离线'){
+          this.nowStatus='设置在线'
+        }else{
+          this.nowStatus='设置离线'
+        }
+      },
+      updateCustomerStatus(status,isTrue){ // 在线离线接口
+        api.updateCustomerStatus({status:status}).then((res) => {
+          if(res.data.success && !res.data.data){ //改变在线离线
+            if(isTrue){
+              this.isActive = true
+              this.isActive_s = false
+              this.isStatus='在线'
+              $('.circle').addClass('inLine')
+              $('.circle').removeClass('outLine')
+            }else{
+              this.isActive = false
+              this.isActive_s = true
+              this.isStatus='离线'
+              $('.circle').addClass('outLine')
+              $('.circle').removeClass('inLine')
+            }
+          }else if(res.data.success && (res.data.data.status == 0 || res.data.data.status == 1 ||  res.data.data.status == 3)){// 页面一进来判断是离线还是在线
+            if(res.data.data.status == 0){
+              this.isActive = false
+              this.isActive_s = true
+              this.isStatus='离线'
+              $('.circle').addClass('outLine')
+              $('.circle').removeClass('inLine')
+            }else if(res.data.data.status == 1){
+              this.isActive = true
+              this.isActive_s = false
+              this.isStatus='在线'
+              $('.circle').addClass('inLine')
+              $('.circle').removeClass('outLine')
+            }else if(res.data.data.status == 3){ // 不是客服
+                this.isCustomer = false
+            }
+            }else if(!res.data.success){
+            this.$notify({
+              title: '提示',
+              message: '在线状态获取失败',
+              duration: 1000
+            });
+          }
+
+        }).catch((err)=>{
+          this.$notify({
+            title: '提示',
+            message: '在线状态获取失败',
+            duration: 1000
+          });
         })
+      },
+      setOnLine(type){ //  设置状态
+        if(type =='1'){
+
+          	this.updateCustomerStatus('1',true)
+        }else{
+
+         	 this.updateCustomerStatus('0',false)
+        }
+        this.isInLine =false
       },
 	  	showModifyPassWord() {
 	  		this.visiblePassWord = false
 	  		this.dialogPassVisible.outerVisible = true
-//	        		innerVisible: false
 	  	},
 	  	showManger(item,index) {
 	  		for (var i=1; i <= this.muneList.length; i++) {
@@ -109,10 +238,7 @@
 	  				this.showObj['show' + i] = false
 	  			}
 	  		}
-	  		console.log(this.muneList,122222)
-//				this.showObj.show1 = !this.showObj.show1
-//	  		this.showObj.show2 = false
-//	      this.showObj.show3 = false
+
 	  	},
 	  	showControl() {
 	  		this.showObj.show2 = !this.showObj.show2
@@ -125,14 +251,23 @@
 	      this.showObj.show2 = false
 	  	},
 	  	showTag(valChild) {
-//	  		this.$route.query.menuId =valChild.id
-	  		console.log(this.$route,'12313123132132132131@@',valChild.url)
+	  		let isRefresh = window.localStorage.getItem("isRefresh")
+	  		if (isRefresh) {
+//	  			if (isRefresh == 'first') {
+//	  			} else {
+//	  				window.localStorage.setItem("isRefresh","otherMore")
+//	  			}
+						window.localStorage.setItem("isRefresh","first")
+	  		} else {
+
+	  		}
+
+//	  		window.localStorage.setItem("closeRoute",valChild.url)
+//	  		this.$route.meta.keepAlive = true
+	  		console.log(this.$route,'12313123132132132131@@',valChild)
 	  		for (var i=1; i <= this.muneList.length; i++) {
 	  				this.showObj['show' + i] = false
 	  		}
-//	  		this.showObj.show1 = false
-//	  		this.showObj.show2 = false
-//	      this.showObj.show3 = false
 			}
 	  },
 	  components: {
@@ -148,20 +283,29 @@
 			height: 64px;
 			padding-top: 1px;
 			line-height: 65px;
-			background-color: #31AFFF;
+			/*background-color: #31AFFF;*/
+	    background: linear-gradient(to right, #02abff, #0794fe);
+	    background: -webkit-linear-gradient(left, #02abff , #0794fe);
+ 		  background: -o-linear-gradient(right, #02abff, #0794fe);
+  		background: -moz-linear-gradient(right, #02abff, #0794fe);
+
 			position: relative;
 			.logo {
         width: 173px;
 				height: 48px;
 		    margin-top: 6px;
-		    margin-left: 11px;
+		    margin-left: 20px;
 		    margin-right: 70px;
 		    float: left;
+		    img {
+		    	width: 100%;
+		    }
 			}
 			.head-rt {
-				margin-right: 50px;
+				margin-right: 20px;
 				color: #fff;
-				font-size: 14px;
+				font-size: 16px;
+
 				span {
 					display: inline-block;
 				}
@@ -192,14 +336,16 @@
 
 				}
 			}
+
 			.ulList {
 				float: left;
 				li {
 				  cursor: pointer;
 					float: left;
 					color: #fff;
-					font-size: 20px;
+					font-size: 18px;
 					margin-right: 30px;
+			    font-weight: bold;
 					&:last-child {
 						margin-right: 0;
 					}
@@ -252,7 +398,12 @@
 				    a {
 				    	display: inline-block;
     					margin-left: 20px;
-		    	    font-size: 16px;
+		    	    font-size: 14px;
+		    	    color: #666;
+		    	    font-family:"Microsoft YaHei";
+							&:hover {
+		    	    	color: #29b1ff;
+		    	    }
 				    }
 					}
 				}
@@ -261,7 +412,7 @@
 		.tit {
 			line-height: 1;
 	    padding: 0px 0 15px;
-      font-family: '微软雅黑 Bold', '微软雅黑';
+      font-family: 'Microsoft YaHei';
 	    font-weight: 600;
 	    font-style: normal;
 	    color: #333;
@@ -274,5 +425,90 @@
 		  opacity: 0;
 		  transform: translateY(100px);
 		}
+    .isInLine{
+
+      margin-right:40px;
+      position:relative;
+
+      .circle{
+        display: inline-block;
+        /*margin-right:10px;*/
+        width:16px;
+        height:16px;
+        /*border-radius: 50%;*/
+        vertical-align: middle;
+      }
+      /*下箭头*/
+      .bottom{
+        cursor:pointer;
+        position: absolute;
+        left: 10px;
+        top: -1px;
+      }
+      .bottom-arrow1,.bottom-arrow2{
+        width:0;
+        height:0;
+        display:block;
+        position:absolute;
+        border-bottom:8px transparent dashed;
+        border-left:8px transparent dashed;
+        border-right:8px transparent dashed;
+        border-top:8px white solid;
+        overflow:hidden;
+      }
+      .bottom-arrow1{
+        top:1px;/*重要 #31AFFF */
+        left:56px;
+        top:27px;
+        /*border-top:10px #31AFFF solid;*/
+        border-top:10px #0697fe  solid;
+
+        z-index: 5;/*兼容ie8-*/
+      }
+      .bottom-arrow2{
+        left:56px;
+        top:30px;
+        border-top:10px white solid;
+        z-index: 4;/*兼容ie8-*/
+      }
+      .outLine{
+        /*background-color: #ccc;*/
+        background:url(../../assets/images/outLine.png) no-repeat;
+        }
+      .inLine{
+        /*background-color: green;*/
+        background:url(../../assets/images/onLine.png) no-repeat;
+        }
+        .line_s1,.line_s2 {
+    	    width: 16px;
+		    height: 16px;
+		    display: inline-block;
+		    vertical-align: middle;
+		    padding-right: 5px;
+        }
+      .setOnline{
+    	cursor: pointer;
+	    width: 100px;
+	    /* height: 30px; */
+	    line-height: 30px;
+	    text-align: center;
+	    background-color: #fff;
+	    border-radius: 6px;
+	    color: #000;
+	    position: absolute;
+	    padding: 5px 0;
+	    top: 50px;
+	    font-size: 12px;
+	    z-index: 999999;
+	    -webkit-box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+	    box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+      }
+    }
+	    .activeLine,.activeLine_s {
+    	    background-color: #e7f7ff;
+	    }
 	}
+    /*.el-popover {*/
+    	/*min-width: 80px !important;*/
+    /*}*/
 </style>

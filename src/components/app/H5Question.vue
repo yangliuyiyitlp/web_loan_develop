@@ -1,9 +1,13 @@
 <template>
   <div class="ques-wrap">
   		<div class="search-wrap">
-			 	<el-input clearable placeholder="Search" v-model="ques_key" class="input-with-select">
-			    <el-button slot="append" icon="el-icon-search" @click="searchList()"></el-button>
+			 	<el-input  v-model="ques_key" class="seach-con" ref='input' 
+			 		@keyup.native.enter="searchList()" @blur = 'showSearchFn' @focus ='hideSearchFn'>
+			    <!--<el-button slot="append" icon="el-icon-search" @click="searchList()"></el-button>-->
 			  </el-input>
+			  <div class="sear-icon" @click='focusFn' v-if='showSearch'>
+			  	<i></i>请输入内容
+			  </div>
 			</div>
       <div class="scroll">
 				<cube-scroll
@@ -19,8 +23,8 @@
 				     <ul id='activityTab'>
 							<li v-for="(item,ind) in items" :key='ind'>
 								<h2 @click='targetTab($event)'>
-									{{item.data}}
 									<i class="icons"></i>
+									{{item.data}}
 								</h2>
 								<div class="actCon" v-html="item.result">
 						    	</div>
@@ -37,9 +41,10 @@
 <script>
 import api from '@/api/index.js'
 export default {
-  name: 'hello',
+  name: 'question',
   data () {
     return {
+    	showSearch: true,
       idArr: [2],
       ques_key: '',
       itemIndex: 1,
@@ -53,7 +58,7 @@ export default {
         pullUpLoad: {
           threshold: 0,          
           txt: {
-            more: '上拉加载更多',
+            more: '往上拉，加载更多',
             noMore: '~我是有底线的~'
           }
         }
@@ -63,7 +68,20 @@ export default {
     }
   }, 
   methods: {
+  	hideSearchFn() {
+  		this.showSearch = false
+  	},
+  	focusFn() {
+  		this.showSearch = false
+  		this.$refs.input.focus()
+  	},
+  	showSearchFn() {
+  		if (!this.ques_key) {  			
+  			this.showSearch = true
+  		}
+  	},
   	searchList(){
+  		console.log(1)
   		this.pageNo = 1;
 	    this.items = []
   		this.queryQuestionList()
@@ -74,7 +92,7 @@ export default {
   			pageNo:this.pageNo,
   			pageSize:this.pageSize,
   			data:this.ques_key,
-//			status:1
+				status:1
   		}
   		api.queryQuestionList(params).then(res=>{
  			console.log(res.data.data,123121231321)
@@ -134,7 +152,8 @@ export default {
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped lang="less">
+<style  lang="less">
+
 .ques-wrap {
 	position: fixed;
   top: 0;
@@ -144,8 +163,34 @@ export default {
 	width: 100%;
 	background-color: #f0eff5;
 	z-index: 20180504;
+	.seach-con input{
+    border-radius: 50px;
+    background-color: rgb(242,242,242);
+    border: none;
+	}
 	.search-wrap {
-		padding: 5px 7px;
+		/*padding: 5px 7px;*/
+		    padding: 10px 15px;
+    background-color: #fff;
+    position: relative;
+	}
+	.sear-icon {
+		position: absolute;
+    top: 50%;
+    left: 50%;
+		font-size: 14px;
+		color: #a8a8a8;
+
+    transform: translateX(-50%) translateY(-50%);
+    i {
+    	display: inline-block; 
+    	width: 16px;
+	    height: 16px;
+	    background: url('../../assets/images/search@2x.png') no-repeat 0px 0px;
+	    background-size: 16px 16px;
+	    vertical-align: middle;
+	    margin-right: 5px;
+    }
 	}
 	.scroll {
 		position: absolute;
@@ -155,12 +200,14 @@ export default {
 		/*height:100%;*/
 		bottom: 0;
 	}
-	#activityTab {
-		background-color: #fff;
+	#activityTab  li{
+		/*background-color: #fff;*/
+		margin-bottom: 6px;
+    background-color: #fff;
 	}
 	#activityTab li .actCon {
 				display: none;
-				border-bottom: 1px solid #e5e5e5;
+				/*border-bottom: 1px solid #e5e5e5;*/
 			    padding: 10px;
 			}
 			#activityTab li .actCon:last-child {
@@ -170,7 +217,7 @@ export default {
 				display: block;
 			}
 			#activityTab li h2 {
-			    margin: 0 10px;
+			    /*margin: 0 10px;
 			    font-size: 14px;			    
 			    color: #333;
 			    font-weight: 400;
@@ -178,27 +225,40 @@ export default {
 			    line-height: 45px;
 			    border-bottom: 1px solid #e5e5e5;
 		        overflow: hidden;
-		        position: relative;
+		        position: relative;*/
+		           margin: 0 15px;
+					    font-size: 14px;
+					    color: #333;
+					    font-weight: 400;
+					    height: 64px;
+					    line-height: 64px;
+					    /* border-bottom: 1px solid #e5e5e5; */
+					    overflow: hidden;
+					    /* position: relative; */
 			   
 			}
+				#activityTab li:last-child {
+					margin-bottom: 0;
+				}
 			#activityTab li h2 span {
 			    float: right;
 				margin-right: 20px;
 			}
 			#activityTab li i.icons {
-				position: absolute;
-			    top: 16px;
-			    right: 0;
+				/*position: absolute;*/
+			    /*top: 16px;
+			    right: 0;*/
 			    display: inline-block;
-			    float: right;
-			    width: 15px;
-			    height: 15px;
-			    background: url('../../assets/images/actRight.png') no-repeat 0px -1px;
-			    background-size: 15px;
+			    /*float: right;*/
+			    width: 16px;
+			    height: 16px;
+			    background: url('../../assets/images/actRight@2x.png') no-repeat 0px 0px;
+			    background-size: 16px 16px;
+			    vertical-align: middle;
 			}
 			#activityTab li i.putdown {
-			    background: url('../../assets/images/actDown.png') no-repeat 0px -1px;
-			    background-size: 15px;
+			    background: url('../../assets/images/actDown@2x.png') no-repeat 0px 0px;
+			    background-size: 16px;
 			}
 			#activityTab li .actCon .imgErma {
 				text-align: center;

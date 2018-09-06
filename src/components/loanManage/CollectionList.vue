@@ -1,6 +1,6 @@
 <template>
   <div class="allCustList">
-    <TitCommon :title='title'></TitCommon>
+    <!--<TitCommon :title='title'></TitCommon>-->
     <div class="custListWrap">
       <search
         ref='search'
@@ -8,7 +8,7 @@
         @searchFn='searchFn'
         :permission ='permission'>
       </search>
-      <div class="table-wrap mrtop20">
+      <div class="table-wrap">
         <table-list
           :loadingTable = 'loadingTable'
           :showRepaymentDay = 'showRepaymentDay'
@@ -38,14 +38,16 @@
 </template>
 
 <script>
-  import TitCommon from '@/components/common/TitCommon'
+//import TitCommon from '@/components/common/TitCommon'
   import Pagination from '@/components/common/Pagination'
   import Search from '@/components/loanManage/Search'
   import DialogFollow from '@/components/loanManage/dialog/DialogFollow'
   import TableList from '@/components/loanManage/LoanTableList'
   import api from "@/api/index"
+import pageSize from "@/api/myPageSize"
+
   export default {
-    name: 'MinitorList',
+    name: 'L_CollectionList',
     data() {
       return {
         title: '预催收订单',
@@ -67,12 +69,15 @@
       }
     },
     created() {
-      if (JSON.parse(localStorage.getItem('myPageSize'))) {
-        this.pageSize = JSON.parse(localStorage.getItem('myPageSize')).MinitorList?JSON.parse(localStorage.getItem('myPageSize')).MinitorList:10
-      } else {
-        let obj = {}
-        localStorage.setItem('myPageSize',JSON.stringify(obj))
+      if( pageSize.getMyPageSize(this.pageSize)){
+        this.pageSize=pageSize.getMyPageSize(this.pageSize)
       }
+      // if (JSON.parse(localStorage.getItem('myPageSize'))) {
+      //   this.pageSize = JSON.parse(localStorage.getItem('myPageSize')).MinitorList?JSON.parse(localStorage.getItem('myPageSize')).MinitorList:10
+      // } else {
+      //   let obj = {}
+      //   localStorage.setItem('myPageSize',JSON.stringify(obj))
+      // }
     },
     computed: {
       permission () {
@@ -82,8 +87,8 @@
       }
     },
     mounted() {
+    	this.getDepartmentZtreeFn()
       this.queryMiniList()
-
     },
     methods:{
 
@@ -99,6 +104,7 @@
 
       },
       queryMiniList(){
+         
         this.loadingTable = true
         let s_time,e_time
         if (this.serachPararms.applyDate) {
@@ -107,6 +113,10 @@
         } else {
           s_time = ''
           e_time = ''
+        }
+        if(!this.serachPararms.overDateStart && !this.serachPararms.overDateEnd){
+          this.serachPararms.overDateStart =0
+          this.serachPararms.overDateEnd =3
         }
         const pararms = {
           pageNo: this.pageNo,
@@ -123,9 +133,12 @@
           cityId: this.serachPararms.applyCity,//城市
           loanTimeBegin: s_time,//放款时间开始
           loanTimeEnd: e_time,//放款时间结束
+          currentModuleId: this.$route.query.menuId,
         }
         console.log(pararms)
         api.queryMiniList(pararms).then(res => {
+           this.total = 0
+            this.tableData = []
           this.loadingTable = false
           if(res.data.success) {
             this.total = res.data.total
@@ -142,7 +155,10 @@
       forWard(row){
         this.dialogFollow.dialogFollowVisible= true
         this.rowFollowId = row.crmCustInfoId
+        this.dialogFollow.crmApplayId = row.crmApplyId
+        console.log(row.crmCustInfoId,1212112121212)
         this.$nextTick(function () {
+          this.$refs.childDialogFollow.pageStart() // 方法2 父组件调用子组件弹框里面的方法 每次点击跟进 页面都是在第一页
           this.$refs.childDialogFollow.queryFollowList() // 方法2 父组件调用子组件弹框里面的方法
 
         })
@@ -151,7 +167,7 @@
         var routeData = this.$router.resolve({
           path: '/detail/orderDetail',
           query: {
-            crmApplayId: row.applyId
+            crmApplayId: row.crmApplyId
           }
         });
         window.open(routeData.href);
@@ -159,20 +175,99 @@
       },
       handleSizeChange(val) {
         this.currentPage = 1
-        let myPageSize = JSON.parse(localStorage.getItem('myPageSize'))
-        myPageSize.MinitorList = val
-        localStorage.setItem('myPageSize',JSON.stringify(myPageSize))
+        pageSize.setMyPageSize(val)
+
+        // let myPageSize = JSON.parse(localStorage.getItem('myPageSize'))
+        // myPageSize.MinitorList = val
+        // localStorage.setItem('myPageSize',JSON.stringify(myPageSize))
         this.pageNo = 1
         this.pageSize = val
         this.queryMiniList()
       },
       handleCurrentChange(val) {
         this.pageNo = val
+        this.currentPage = val
         this.queryMiniList()
       },
+      getDepartmentZtreeFn() {
+//    	alert(111)
+				api.getDepartmentZtree({groupId:''}).then(res => {
+					if(res.data.status == 1) {
+						this.zTreeData = this.toTree(res.data.ztree)
+					} else {
+						this.$notify({
+				           title: '提示',
+				           message: res.data.msg,
+				           duration: 1500
+				        });
+					}
+				})
+			},
+			toTree(ary, data) {
+				var _this = this
+				var data = data ? data : (function(ary) {
+					var tempAry = [];
+					var idList = [];
+					ary.forEach(function(item) {
+						idList.push(item.id)
+					});
+					for(var i = 0, len = ary.length; i < len; i++) {
+						if(ary[i].pId == undefined || (ary[i].pId != undefined && _this.debFn(ary[i].pId, idList))) {
+							var obj = {
+								title: ary[i].name,
+								id: ary[i].id
+							};
+							tempAry.push(obj);
+						}
+					}
+					return tempAry;
+				}(ary));
+				var temp = 0;
+				if(data.constructor == Array) {
+					for(var i = 0, len = data.length; i < len; i++) {
+						for(var j = 0, lenA = ary.length; j < lenA; j++) {
+							if(ary[j].pId == data[i].id) {
+								var obj = {
+									title: ary[j].name,
+									id: ary[j].id
+								};
+								data[i].children = data[i].children || [];
+								data[i].children.push(obj);
+								temp++;
+							}
+						}
+					}
+				}
+				if(temp > 0) {
+					if(data.constructor == Array) {
+						for(var n = 0, lenB = data.length; n < lenB; n++) {
+							data[n].children = this.toTree(ary, data[n].children ? data[n].children : []);
+							if(data[n].children.length == 0) {
+								delete data[n].children;
+							}
+		//							delete data[n].id;
+						}
+					}
+				} else {
+					for(var n = 0, lenB = data.length; n < lenB; n++) {
+		//						delete data[n].id;
+					}
+				}
+				return data;
+
+			},
+			debFn(id, idList) {
+				var flag = true;
+				for(var ida in idList) {
+					if(id == idList[ida]) {
+						flag = false;
+					}
+				}
+				return flag;
+			},
     },
     components: {
-      TitCommon,
+//    TitCommon,
       Search,
       Pagination,
       DialogFollow,

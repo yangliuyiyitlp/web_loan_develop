@@ -1,6 +1,6 @@
 <template>
  <div class="allCustList">
- 	<TitCommon :title='title'></TitCommon>
+ 	<!--<TitCommon :title='title'></TitCommon>-->
  	<div class="custListWrap">
  		<search
  			ref='search'
@@ -35,12 +35,17 @@
 
 <script>
 import api from "@/api/index"
-import TitCommon from '@/components/common/TitCommon'
+import pageSize from "@/api/myPageSize"
+
+//import TitCommon from '@/components/common/TitCommon'
 import Pagination from '@/components/common/Pagination'
-import TableList from '@/components/orderManage/TableList'
-import Search from '@/components/orderManage/OrderSearch'
+//import TableList from '@/components/common/OrderAndCtrollTableList'
+import TableList from '@/components/common/OrderAndCtrollTableList'
+
+import Search from '@/components/common/OrderAndCustomerSearch'
+//import Search from '@/components/orderManage/OrderSearch'
 export default {
-	name: 'allList',
+	name: 'O_AllOrderList',
 	data() {
 	  	return {
 	  		title: '订单管理',
@@ -74,6 +79,7 @@ export default {
 				onlyOrderNode: true, //true是申请中页面控制的订单环节，fasle是审批中页面控制的订单环节
 				showOnlyCheck:true,
 				showUp:true,
+				searchContent:'请输入姓名、手机号或身份证号码精确查询'
 
 	 		}
 	 	}
@@ -85,17 +91,20 @@ export default {
 // 	this.$refs.search.checkOrderNodeFn()
  },
  created() {
- 	if (JSON.parse(localStorage.getItem('myPageSize'))){
- 		this.pageSize = JSON.parse(localStorage.getItem('myPageSize')).W_AllOrdrList?JSON.parse(localStorage.getItem('myPageSize')).W_AllOrdrList:10
- 		console.log(JSON.parse(localStorage.getItem('myPageSize')).W_AllOrdrList)
- 	} else {
- 		let obj = {}
- 		localStorage.setItem('myPageSize',JSON.stringify(obj))
- 	}
+   if( pageSize.getMyPageSize(this.pageSize)){
+     this.pageSize=pageSize.getMyPageSize(this.pageSize)
+   }
+ 	// if (JSON.parse(localStorage.getItem('myPageSize'))){
+ 	// 	this.pageSize = JSON.parse(localStorage.getItem('myPageSize')).W_AllOrdrList?JSON.parse(localStorage.getItem('myPageSize')).W_AllOrdrList:10
+ 	// 	console.log(JSON.parse(localStorage.getItem('myPageSize')).W_AllOrdrList)
+ 	// } else {
+ 	// 	let obj = {}
+ 	// 	localStorage.setItem('myPageSize',JSON.stringify(obj))
+ 	// }
  },
   methods: {
   	queryApplyOrderInfoFn() {
-  		this.tableData = []
+		 
   		this.loadingTable = true
   		let s_time,e_time
   		if (this.serachPararms.applyDate) {
@@ -127,6 +136,8 @@ export default {
   		console.log(this.serachPararms,6666)
   		console.log(pararms,6666)
 		api.queryApplyOrderInfo(pararms).then(res => {
+			 this.tableData = []
+		  this.total = 0
 			this.loadingTable = false
 			if(res.data.success) {
 				this.total = res.data.total
@@ -144,7 +155,9 @@ export default {
   	queryPageDictionaryDetailFn(code,type) {
 		let pararms = {
 			code: code,
-			pageSize: 10000
+			pageSize: 10000,
+			pageNo:1,
+			status:1
 		}
 
 		api.queryPageDictionaryDetail(pararms).then(res => {
@@ -211,9 +224,12 @@ export default {
   	},
   	handleSizeChange(val) {
 		this.currentPage = 1
-		let myPageSize = JSON.parse(localStorage.getItem('myPageSize'))
-  		myPageSize.W_AllOrdrList = val
-	 	localStorage.setItem('myPageSize',JSON.stringify(myPageSize))
+      this.pageNo = 1
+      pageSize.setMyPageSize(val)
+
+      // let myPageSize = JSON.parse(localStorage.getItem('myPageSize'))
+  		// myPageSize.W_AllOrdrList = val
+	 	// localStorage.setItem('myPageSize',JSON.stringify(myPageSize))
 		this.pageSize = val
 		this.queryApplyOrderInfoFn()
 //		console.log(val,777777777777)
@@ -305,7 +321,7 @@ export default {
 	},
   },
   components: {
-  	TitCommon,
+//	TitCommon,
   	TableList,
 	Search,
 	Pagination,
@@ -316,8 +332,8 @@ export default {
 
  }
 </script>
-<style lang="less">
-	.allCustList {
+<style lang="less" scoped="scoped">
+	/*.allCustList {
 		.table-wrap {
 			padding-top: 20px;
 			.el-table th {
@@ -328,5 +344,5 @@ export default {
 			}
 		}
 
-	}
+	}*/
 </style>

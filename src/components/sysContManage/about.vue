@@ -5,10 +5,12 @@
 			ref='edit'
 			id="editor_id" :minHeight="300" :content="editorText"
 	        pluginsPath="/static/kindEditor/plugins/"
-	        :allowImageRemote=' false'
+	        :allowImageRemote='false'
+	        urlType='domain'
 	        :items= 'item'
 	        :loadStyleMode="false"
 	        :uploadJson = 'uploadJson'
+	        @afterUpload ='afterUpload'
 	        @on-content-change="onContentChange">
 	    </editor>
 		<div class="btn">
@@ -22,7 +24,7 @@
 <script>
 import api from "@/api/index"
 export default {
-  	name: 'app_about',
+  	name: 'SYC_About',
   	props: {
 //		tableData:{
 //			type: Array,
@@ -90,6 +92,9 @@ export default {
 	    },
 	    afterChange () {
 	    },
+	    afterUpload(url) {
+	    	console.log(url,1121212)
+	    },
 	    viewH5() {
 	    	// this.src=this.htmlTop + this.editorText  + this.htmlBot
 	    	this.src=this.editorText
@@ -108,10 +113,10 @@ export default {
         // let htmlStr =html_nbsp.join(',')
 
 
-        if(html_con.length<=0){
-	    	  this.$message.warning("内容不能为空")
-          return false;
-        }
+	        if(html_con.length<=0){
+		    	  this.$message.warning("内容不能为空")
+	          return false;
+	        }
 	    	const parm = {
 	    		id: this.id,
 	    		data: this.editorText
@@ -122,7 +127,8 @@ export default {
 		           title: '提示',
 		           message: res.data.msg,
 		           duration: 1500
-		        });
+				});
+				this.initialHtml()
 	    		console.log(res.data)
 	    	})
 	    },

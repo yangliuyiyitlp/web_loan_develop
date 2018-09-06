@@ -11,7 +11,7 @@ import router from '../router'
 
 export default {
   name: 'home',
-  
+
   beforeRouteEnter (to, from, next) {
     var userinfo = JSON.parse(localStorage.getItem('userinfo'))
     let activityUrl = ''

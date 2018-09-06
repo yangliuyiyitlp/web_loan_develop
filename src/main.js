@@ -8,8 +8,8 @@ import router from './router'
 import moment from 'moment'
 import './assets/css/reset.css'
 import './assets/css/style.css'
-//import 'kindEditor/kindeditor-all.js'  
-//import 'kindEditor/lang/zh_CN.js'  
+//import 'kindEditor/kindeditor-all.js'
+//import 'kindEditor/lang/zh_CN.js'
 //import 'kindEditor/themes/default/default.css'
 
 import 'vue-tree-halower/dist/halower-tree.min.css' // 你可以自定义树的样式
@@ -19,7 +19,7 @@ Vue.use(VTree)
 
 
 import store from './store'
-import * as filters from '@/filters/filters.js'  
+import * as filters from '@/filters/filters.js'
 
 import Cube from 'cube-ui'
 Vue.use(Cube)
@@ -38,16 +38,16 @@ Vue.use(VueKindEditor)
 
 //Vue.use(VueKindEditor)
 
-Object.keys(filters).forEach(key => {  
-    Vue.filter(key, filters[key])  
-})  
+Object.keys(filters).forEach(key => {
+    Vue.filter(key, filters[key])
+})
 
 /*by WQ*/
 import ElementUI from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'
 Vue.use(ElementUI)
 /*by WQ*/
-  
+
 
    Vue.prototype.$loading = ElementUI.Loading.service
    Vue.prototype.$msgbox = ElementUI.MessageBox

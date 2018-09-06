@@ -9,5 +9,12 @@ let formatMobile = value => {
 		return value.replace(/(\d{3})\d{4}(\d{4})/, '$1****$2');
 	}
 }
-//
-export { formatDates,formatMobile }  
+let formatTimes = time => { //如2018-08-13 11:07:27 ==> 2018-08-13 11:07 
+    if(time && time != null){  
+    	let num = time.lastIndexOf(":")
+    	return time.slice(0,num)
+    } else {
+    	return ''
+    }
+}
+export { formatDates,formatMobile, formatTimes }  

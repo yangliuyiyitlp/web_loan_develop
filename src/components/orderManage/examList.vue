@@ -1,47 +1,49 @@
 <template>
  <div class="allCustList">
- 	<TitCommon :title='title'></TitCommon>
+ 	<!--<TitCommon :title='title'></TitCommon>-->
  	<div class="custListWrap">
- 		<search  
+ 		<search
  			ref='search'
  			:treeData = 'treeData'
- 			:data = 'zTreeData' 
+ 			:data = 'zTreeData'
  			:checkListName = 'checkListName'
- 			@CustDistributionFn='CustDistributionFn' 
- 			@searchFn='searchFn' 
- 			:permission ='permission'> 			
+ 			@CustDistributionFn='CustDistributionFn'
+ 			@searchFn='searchFn'
+ 			:permission ='permission'>
  		</search>
  		<div class="table-wrap">
- 			<table-list 
+ 			<table-list
  				:loadingTable = 'loadingTable'
- 				:tableData='tableData' 
+ 				:tableData='tableData'
  				@showDialogTableVisible = 'showDialogTableVisible'
  				@showOrderDetail = 'showOrderDetail'
- 				> 				
- 			</table-list> 			
+ 				>
+ 			</table-list>
  		</div>
  		<div class="pad20 alignCen">
- 			<pagination 				
+ 			<pagination
 				:currentPage = 'currentPage'
 				:total = 'total'
 				:myPageSizes = 'pageSize'
 				@handleSizeChange = 'handleSizeChange'
 				@handleCurrentChange = 'handleCurrentChange'
- 				> 				
+ 				>
  			</pagination>
- 		</div> 		
+ 		</div>
  	</div>
  </div>
 </template>
 
 <script>
-import api from "@/api/index"	
-import TitCommon from '@/components/common/TitCommon'
+import api from "@/api/index"
+import pageSize from "@/api/myPageSize"
+
+//import TitCommon from '@/components/common/TitCommon'
 import Pagination from '@/components/common/Pagination'
-import TableList from '@/components/orderManage/TableList'
-import Search from '@/components/orderManage/OrderSearch'
+import TableList from '@/components/common/OrderAndCtrollTableList'
+import Search from '@/components/common/OrderAndCustomerSearch'
 export default {
-  name: 'allList',
+  name: 'O_ExamList',
   data() {
   	return {
   		title: '审批中订单',
@@ -63,7 +65,7 @@ export default {
         treeData: [],
         loadingTable: false,
 //      multipleSelectionIdList: '',
-        
+
   	}
  },
  computed: {
@@ -80,7 +82,8 @@ export default {
 			onlyOrderNode: false, //true是申请中页面控制的订单环节，fasle是审批中页面控制的订单环节
 			detailCode: '000002',//审批中
 			showUp:true,
-			showOnlyCheck: true
+			showOnlyCheck: true,
+			searchContent:'请输入姓名、手机号或身份证号码精确查询'
  		}
  	}
  },
@@ -90,16 +93,20 @@ export default {
 // 	this.$refs.search.checkOrderNodeFn()
  },
  created() {
- 	if (JSON.parse(localStorage.getItem('myPageSize'))) { 	
- 		this.pageSize = JSON.parse(localStorage.getItem('myPageSize')).W_ExamList?JSON.parse(localStorage.getItem('myPageSize')).W_ExamList:10
- 		console.log(JSON.parse(localStorage.getItem('myPageSize')).W_ExamList)
- 	} else {
- 		let obj = {}
- 		localStorage.setItem('myPageSize',JSON.stringify(obj))
- 	}
+   if( pageSize.getMyPageSize(this.pageSize)){
+     this.pageSize=pageSize.getMyPageSize(this.pageSize)
+   }
+ 	// if (JSON.parse(localStorage.getItem('myPageSize'))) {
+ 	// 	this.pageSize = JSON.parse(localStorage.getItem('myPageSize')).W_ExamList?JSON.parse(localStorage.getItem('myPageSize')).W_ExamList:10
+ 	// 	console.log(JSON.parse(localStorage.getItem('myPageSize')).W_ExamList)
+ 	// } else {
+ 	// 	let obj = {}
+ 	// 	localStorage.setItem('myPageSize',JSON.stringify(obj))
+ 	// }
  },
   methods: {
   	queryApplyOrderInfoFn() {
+		
   		this.loadingTable = true
   		let s_time,e_time
   		if (this.serachPararms.applyDate) {
@@ -114,7 +121,7 @@ export default {
   			pageNo: this.pageNo,
   			pageSize: this.pageSize,
 			queryParam: this.serachPararms.content,
-			orderStatus: [2],//订单状态：1申请中,2审批中,3还款中,4已结清,5拒绝,6线上筹资中,7满标,8满标以放款,9流标,10退件
+			orderStatus: '2,6,7,8,9',//订单状态：1申请中,2审批中,3还款中,4已结清,5拒绝,6线上筹资中,7满标,8满标以放款,9流标,10退件
 //			custStatus: [1,2],//客户状态:1未实名,2已实名,3已成交[1,2]
 			applyTimeBegin: s_time,
 			applyTimeEnd: e_time,
@@ -128,15 +135,18 @@ export default {
 			hangStatus: this.serachPararms.hangStatus,
 			provId: this.serachPararms.applyProvince,
 			cityId: this.serachPararms.applyCity,
-			oneSelf: this.serachPararms.onlyCheck
+			oneSelf: this.serachPararms.onlyCheck,
+        number:1
   		}
 //		console.log(this.serachPararms,6666)
 //		console.log(pararms,6666)
 		api.queryApplyOrderInfo(pararms).then(res => {
+			  this.total = 0
+				this.tableData =[]
 			this.loadingTable = false
 			if(res.data.success) {
 				this.total = res.data.total
-				this.tableData = res.data.data 
+				this.tableData = res.data.data
 			} else {
 				this.$notify({
 		           title: '提示',
@@ -148,10 +158,10 @@ export default {
 		})
   	},
   	showDialogTableVisible(row,orShow) {
-//		this.visibleObj.dialogTableVisible = orShow	  	
+//		this.visibleObj.dialogTableVisible = orShow
   		console.log(row,orShow)
   	},
-  	showOrderDetail(row,orShow) {  		
+  	showOrderDetail(row,orShow) {
 		var routeData = this.$router.resolve({
         	path: '/detail/orderDetail',
         	query: {
@@ -187,23 +197,26 @@ export default {
   	},
   	handleSizeChange(val) {
 		this.currentPage = 1
-		let myPageSize = JSON.parse(localStorage.getItem('myPageSize'))
-  		myPageSize.W_ExamList = val
-	 	localStorage.setItem('myPageSize',JSON.stringify(myPageSize))
-		this.pageSize = val  
+      this.pageNo = 1
+      pageSize.setMyPageSize(val)
+
+      // let myPageSize = JSON.parse(localStorage.getItem('myPageSize'))
+  		// myPageSize.W_ExamList = val
+	 	// localStorage.setItem('myPageSize',JSON.stringify(myPageSize))
+		this.pageSize = val
 		this.queryApplyOrderInfoFn()
 //		console.log(val,777777777777)
 	},
 	handleCurrentChange(val) {
-		this.pageNo = val	
+		this.pageNo = val
 		this.currentPage = val
-//		this.pageNo = val	
+//		this.pageNo = val
 		this.queryApplyOrderInfoFn()
 //		console.log(val,88888888)
 	},
 	getDepartmentZtreeFn() {
 		api.getDepartmentZtree({groupId:''}).then(res => {
-			if(res.data.status == 1) {		
+			if(res.data.status == 1) {
 				this.treeData = res.data.ztree
 				this.zTreeData = this.toTree(res.data.ztree)
 			} else {
@@ -223,7 +236,7 @@ export default {
 			var idList = [];
 			ary.forEach(function(item) {
 				idList.push(item.id)
-			});					
+			});
 			for(var i = 0, len = ary.length; i < len; i++) {
 				if(ary[i].pId == undefined || (ary[i].pId != undefined && _this.debFn(ary[i].pId, idList))) {
 					var obj = {
@@ -280,7 +293,7 @@ export default {
 	},
   },
   components: {
-  	TitCommon,
+//	TitCommon,
   	TableList,
 	Search,
 	Pagination,
@@ -288,20 +301,9 @@ export default {
 //	DialogFollow,
 //	DialogFollow
   }
-  
+
  }
 </script>
-<style lang="less">
-	.allCustList {		
-		.table-wrap {
-			padding-top: 20px;
-			.el-table th {
-				padding: 9px 0;
-			} 
-			.el-table td{
-				padding: 3px 0;
-			}
-		}
-		
-	}
+<style lang="less" scoped>
+
 </style>

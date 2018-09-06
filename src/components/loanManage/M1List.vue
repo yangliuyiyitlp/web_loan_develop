@@ -1,12 +1,12 @@
 <template>
  <div class="M1List">
- 	<TitCommon :title='title'></TitCommon>
+ 	<!--<TitCommon :title='title'></TitCommon>-->
  	<div class="custListWrap">
- 		<search  
+ 		<search
  			ref='search'
- 			:data = 'zTreeData'  			
- 			@searchFn='searchFn' 
- 			:permission ='permission'> 			
+ 			:data = 'zTreeData'
+ 			@searchFn='searchFn'
+ 			:permission ='permission'>
  		</search>
  	</div>
  	<div>
@@ -16,38 +16,40 @@
  			:voerdueStatus = 'voerdueStatus'
  			@goFollow= 'goFollow'
  			@goOrderDetail = 'goOrderDetail'
- 			> 			
+ 			>
  		</OverdueM1TableList>
  	</div>
  	<div class="pad20 alignCen">
-		<pagination 				
+		<pagination
 			:currentPage = 'currentPage'
 			:total = 'total'
 			:myPageSizes = 'pageSize'
 			@handleSizeChange = 'handleSizeChange'
 			@handleCurrentChange = 'handleCurrentChange'
-			> 				
+			>
 		</pagination>
 	</div>
 	<!--跟进弹框-->
- 	<dialog-follow :dialogFollow='dialogFollow' :rowFollowId = 'rowFollowId' ref="childDialogFollow"> 		
+ 	<dialog-follow :dialogFollow='dialogFollow' :rowFollowId = 'rowFollowId' ref="childDialogFollow">
  	</dialog-follow>
  </div>
 </template>
 
 <script>
 import api from "@/api/index"
-import TitCommon from '@/components/common/TitCommon'
+import pageSize from "@/api/myPageSize"
+
+//import TitCommon from '@/components/common/TitCommon'
 import Search from '@/components/loanManage/Search'
 import OverdueM1TableList from '@/components/loanManage/OverdueM1TableList'
 import Pagination from '@/components/common/Pagination'
 import DialogFollow from '@/components/loanManage/dialog/DialogFollow'
 export default {
-  	name: 'allOverdue',
+  	name: 'L_M1List',
   	computed: {
 	 	permission () {
 	 		return {
-	 			showAllPararms: false,//1'正常',0'检测异常'
+	 			showAllPararms: false,//1'正常',0'监测异常'
 				showOrderState: false, //是否要展示高级搜索的‘逾期状态’的条件
 				typeNameIndex: 1,//1逾期天数,2放款天数,3距还款日
 	 		}
@@ -59,32 +61,31 @@ export default {
 	  		voerdueStatus: false,//是否要展示列表的’逾期状态‘
 	  		title: 'M1订单管理',
 	  		zTreeData: [],
-//	        checkListName: ['正常','检测异常'],
+//	        checkListName: ['正常','监测异常'],
 	        currentPage:1,
 	  		total: 0,
 	  		pageNo: 1,
 	        pageSize: 10,
 	        serachPararms:{},
 	        tableData: [],
-	        currentPage:1,
-	  		total: 0,
-	  		pageNo: 1,
-	        pageSize: 10,
 	        dialogFollow: {
-	  			dialogFollowVisible: false,	
+	  			dialogFollowVisible: false,
 	  			crmApplayId:''
 	  		},
 	  		rowFollowId: null
 	  	}
   	},
   	created() {
-	 	if (JSON.parse(localStorage.getItem('myPageSize'))) { 	
-	 		this.pageSize = JSON.parse(localStorage.getItem('myPageSize')).W_M1List?JSON.parse(localStorage.getItem('myPageSize')).W_M1List:10
-	 		console.log(JSON.parse(localStorage.getItem('myPageSize')).W_M1List)
-	 	} else {
-	 		let obj = {}
-	 		localStorage.setItem('myPageSize',JSON.stringify(obj))
-	 	}
+      if( pageSize.getMyPageSize(this.pageSize)){
+        this.pageSize=pageSize.getMyPageSize(this.pageSize)
+      }
+	 	// if (JSON.parse(localStorage.getItem('myPageSize'))) {
+	 	// 	this.pageSize = JSON.parse(localStorage.getItem('myPageSize')).W_M1List?JSON.parse(localStorage.getItem('myPageSize')).W_M1List:10
+	 	// 	console.log(JSON.parse(localStorage.getItem('myPageSize')).W_M1List)
+	 	// } else {
+	 	// 	let obj = {}
+	 	// 	localStorage.setItem('myPageSize',JSON.stringify(obj))
+	 	// }
 	},
   	mounted() {
   		this.getDepartmentZtreeFn()
@@ -92,6 +93,7 @@ export default {
   	},
   	methods: {
   		queryOverdueOrdersFn() {
+			
   			this.loadingTable = true
   			let s_time,e_time
 	  		if (this.serachPararms.applyDate) {
@@ -114,14 +116,17 @@ export default {
 				oneSelf: this.serachPararms.onlyCheck,
 				loanTimeBegin: s_time,//放款时间开始
 				loanTimeEnd: e_time,//放款时间结束
-				overdueDayBegin: this.serachPararms.overDateStart,//逾期天数开始 
+				overdueDayBegin: this.serachPararms.overDateStart,//逾期天数开始
 				overdueDayEnd: this.serachPararms.overDateEnd,//逾期天数结束
-//				overdueStatusBegin:'', //逾期状态开始
-//				overdueStatusEnd:'', //逾期状态结束
+				overdueStatusBegin:'1', //逾期状态开始
+				overdueStatusEnd:'1', //逾期状态结束
+				currentModuleId: this.$route.query.menuId,
 	  		}
 	  		console.log(pararms)
   			api.queryOverdueOrders(pararms).then(res => {
-  				this.loadingTable = false  				
+				    this.total = 0
+					this.tableData =[]
+  				this.loadingTable = false
   				if(res.data.success) {
 					this.total = res.data.total
 					this.tableData = res.data.data
@@ -133,30 +138,35 @@ export default {
 			        });
 				}
   			})
-		},  		
+		},
   		searchFn(data) {
-			this.serachPararms = Object.assign(this.serachPararms,data)
-			if(!this.serachPararms.checkListParams){
-				this.serachPararms.checkListParams = ''
-			}
-			this.queryOverdueOrdersFn()
+  			this.pageNo = 1
+	      this.currentPage = 1
+				this.serachPararms = Object.assign(this.serachPararms,data)
+				if(!this.serachPararms.checkListParams){
+					this.serachPararms.checkListParams = ''
+				}
+				this.queryOverdueOrdersFn()
 	
-			console.log(this.serachPararms,'-=-=-=--')
-			console.log(data)
-	
+				console.log(this.serachPararms,'-=-=-=--')
+				console.log(data)
+
 	  	},
 	  	handleSizeChange(val) {
 			this.currentPage = 1
-			let myPageSize = JSON.parse(localStorage.getItem('myPageSize'))
-	  		myPageSize.W_M1List = val
-		 	localStorage.setItem('myPageSize',JSON.stringify(myPageSize))
+        pageSize.setMyPageSize(val)
+
+        // let myPageSize = JSON.parse(localStorage.getItem('myPageSize'))
+	  		// myPageSize.W_M1List = val
+		 	// localStorage.setItem('myPageSize',JSON.stringify(myPageSize))
 			this.pageNo = 1
-			this.pageSize = val  
+			this.pageSize = val
 			this.queryOverdueOrdersFn()
 	//		console.log(val,777777777777)
 		},
 		handleCurrentChange(val) {
-			this.pageNo = val	
+			this.pageNo = val
+      this.currentPage = val
 			this.queryOverdueOrdersFn()
 	//		console.log(val,88888888)
 		},
@@ -164,13 +174,14 @@ export default {
 			this.dialogFollow.dialogFollowVisible = true
 			this.dialogFollow.crmApplayId = row.crmApplyId
 			console.log(row,'/api/upload/upload')
-	  		this.rowFollowId = row.crmCustInfoId 
+	  		this.rowFollowId = row.crmCustInfoId
 	  		this.$nextTick(function () {
+          this.$refs.childDialogFollow.pageStart() // 方法2 父组件调用子组件弹框里面的方法 每次点击跟进 页面都是在第一页
 	   			this.$refs.childDialogFollow.queryFollowList() // 方法2 父组件调用子组件方法
 	  		})
 
 		},
-		goOrderDetail(row) {//查看			
+		goOrderDetail(row) {//查看
 			var routeData = this.$router.resolve({
 	        	path: '/detail/orderDetail',
 	        	query: {
@@ -178,11 +189,11 @@ export default {
 	        	}
 	      	});
 	      	window.open(routeData.href);
-	//		this.dialogFollow.dialogFollowVisible = orShow			
+	//		this.dialogFollow.dialogFollowVisible = orShow
 		},
 	  	getDepartmentZtreeFn() {
 			api.getDepartmentZtree({groupId:''}).then(res => {
-				if(res.data.status == 1) {							
+				if(res.data.status == 1) {
 					this.zTreeData = this.toTree(res.data.ztree)
 				} else {
 					this.$notify({
@@ -201,7 +212,7 @@ export default {
 				var idList = [];
 				ary.forEach(function(item) {
 					idList.push(item.id)
-				});					
+				});
 				for(var i = 0, len = ary.length; i < len; i++) {
 					if(ary[i].pId == undefined || (ary[i].pId != undefined && _this.debFn(ary[i].pId, idList))) {
 						var obj = {
@@ -245,7 +256,7 @@ export default {
 				}
 			}
 			return data;
-	
+
 		},
 		debFn(id, idList) {
 			var flag = true;
@@ -258,26 +269,26 @@ export default {
 		},
   	},
   	components: {
-  		TitCommon,
+//		TitCommon,
   		Search,
   		Pagination,
   		DialogFollow,
   		OverdueM1TableList
   	}
-  
+
  }
 </script>
-<style lang="less">
-	.M1List {		
+<style lang="less" scoped>
+	/*.M1List {
 		.table-wrap {
 			padding-top: 20px;
 			.el-table th {
 				padding: 9px 0;
-			} 
+			}
 			.el-table td{
 				padding: 3px 0;
 			}
 		}
-		
-	}
+
+	}*/
 </style>

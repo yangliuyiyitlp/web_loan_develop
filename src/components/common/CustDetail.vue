@@ -1,7 +1,11 @@
 
 <template>
 <div>
-	<div class="top"><img src="../../assets/images/logo.png"></div>
+	<div class="top">
+		<div class="iconHead">
+  		<img src="../../assets/images/logo.png">
+  	</div>
+	</div>
 	<div class="detail">
 		<div class="sheet" >
 			<p>
@@ -18,11 +22,11 @@
 				  v-model="visiblePassWord"
 				  >
 				  <div class='custPermissonPsd' style="">
-				    <p><span @click="showModifyPsd(1)">重置密码</span></p>
-				    <p><span @click="showModifyPsd(2)">修改注册手机号码</span></p>
+				    <p><a @click="showModifyPsd(1)">重置密码</a></p>
+				    <p><a @click="showModifyPsd(2)">修改注册手机号码</a></p>
 				    <p>
-				    	<span @click="showModifyPsd(3,0)" v-if="lockCustType == 1">冻结客户</span>
-				    	<span @click="showModifyPsd(3,1)" v-if="lockCustType == 0">解冻客户</span>
+				    	<a @click="showModifyPsd(3,0)" v-if="lockCustType == 1">冻结客户</a>
+				    	<a @click="showModifyPsd(3,1)" v-if="lockCustType == 0">解冻客户</a>
 				    </p>
 				  </div>
 				  <!--<i class="" slot="reference"></i>-->
@@ -40,7 +44,7 @@
 		  	<table>
 		  		<tr>
 		  			<td>性别</td>
-		  			<td>{{userBaseInfo.icSex == 1?'男':'女'}}</td>
+		  			<td>{{userBaseInfo.icSex == 1?'男':userBaseInfo.icSex == 2?'女':''}}</td>
 		  			<td>发证机关</td>
 		  			<td>{{userBaseInfo.icIssUingAuthority}}</td>
 		  		</tr>
@@ -67,6 +71,7 @@
 		  			<td v-if = 'userBaseInfo.marital == 2'>未婚</td>
 		  			<td v-if = 'userBaseInfo.marital == 3'>离异</td>
 		  			<td v-if = 'userBaseInfo.marital == 4'>丧偶</td>
+		  			<td v-else></td>
 		  		</tr>
 		  		<tr>
 		  			<td>身份证号码</td>
@@ -79,6 +84,7 @@
 					<td v-if = 'userBaseInfo.hignestDegree == 4'>高中</td>
 					<td v-if = 'userBaseInfo.hignestDegree == 5'>中专/技校</td>
 					<td v-if = 'userBaseInfo.hignestDegree == 6'>初中及以下</td>
+					<td v-else></td>
 		  			<!--<td>{{userBaseInfo.hignestDegree}}</td>-->
 		  		</tr>
 		  		<tr>
@@ -92,7 +98,7 @@
 		  			<td>{{userBaseInfo.deptName}}</td>
 		  		</tr>
 		  	</table>
-		  	<h3 v-if="jobNature">工作信息</h3>
+		  	<div class="jobTypeClass" ><div>工作信息<span v-if="jobNature ==1">工薪者</span><span  v-if="jobNature ==2">企业经营者</span><span v-if="jobNature ==3">自由职业者</span><span v-if="jobNature ==4">学生</span><span v-if="jobNature ==5">退休人员</span></div></div>
 		  	<table v-if="jobNature ==1">
 		  		<tr>
 		  			<th colspan="4">单位信息</th>
@@ -108,7 +114,7 @@
 		  		</tr>
 		  		<tr>
 		  			<td>座机</td>
-		  			<td>{{userBaseInfo.companyTelArea}}<a href="#" v-if="userBaseInfo.companyTelArea">-</a>{{userBaseInfo.companyTelNo}}<a href="#" v-if="userBaseInfo.companyTelExt">-</a>{{userBaseInfo.companyTelExt}}</td>
+		  			<td>{{userBaseInfo.fixedTelephone}}</td>
 		  			<td>手机</td>
 		  			<td>{{userBaseInfo.companyMobile }}</td>
 		  		</tr>
@@ -138,16 +144,21 @@
 		  			<td width="60">收入来源</td>
 		  			<td>{{userBaseInfo.revenueSources}}</td>
 		  			<td width="60">月收入</td>
-		  			<td >{{userBaseInfo.averageMonthlyIncome}}</td>
+		  			<td >{{userBaseInfo.averageMonthlyIncome}} 元</td>
 		  		</tr>
 		  	</table>
+        <table v-if="jobNature ==4 || jobNature ==5"></table>
 		  </el-tab-pane>
 		  <el-tab-pane label="联系人信息" name="2"  >
 		  		<el-table
 			      :data="linkInfo"
 			      border
 			      style="width: 100%">
-			      <el-table-column align='center' type="index"  width="160" label=" " :index="indexMethod">
+			      <el-table-column align='center' type="index"  width="160" label=" " >
+              <template slot-scope="scope">
+                <span> 第{{scope.row.relationTop}}联系人</span>
+              </template>
+
 			      </el-table-column>
 			      <el-table-column
 			      	align='center'
@@ -172,6 +183,11 @@
 			        :show-overflow-tooltip="true"
 			        prop="linkmanIsKnow"
 			        label="是否允许知晓该借款">
+              <template slot-scope="scope">
+                <span v-if="scope.row.linkmanIsKnow ==0">是</span>
+                <span v-if="scope.row.linkmanIsKnow ==1">否</span>
+                <span v-if="scope.row.linkmanIsKnow ==null"></span>
+              </template>
 			      </el-table-column>
 			    </el-table>
 		  </el-tab-pane>
@@ -187,9 +203,14 @@
 		  		<tr>
 		  			<td width="100">账户余额</td>
 		  			<td>
-		  				<span v-if="!eye">{{accountMoney}}</span>
+               <span v-if="!accoutInfo.bankAccount">--</span>
+              <span v-if="accoutInfo.bankAccount">
+                <span v-if="!eye">{{accountMoney}}</span>
 		  				<span v-if="eye">*****</span>
-		  				元<i class="el-icon-view" @click="eyeToggle()" ></i>
+		  				元<i class="el-icon-view" @click="eyeToggle()" v-if="!eye"></i>
+              <i  @click="eyeToggle()" v-if="eye"><img class='eyeClosed' src="../../assets/images/icon/eye_closed.png" alt=""></i>
+              </span>
+
 		  			</td>
 		  		</tr>
 		  	</table>
@@ -287,6 +308,7 @@
 		 			<pagination
 						:currentPage = 'currentPage'
 						:total = 'total'
+            :layout='layout'
 						@handleSizeChange = 'handleSizeChange'
 						@handleCurrentChange = 'handleCurrentChange'
 		 				>
@@ -311,7 +333,7 @@
 			  	<div class=" ">
 				  	<el-form :model="ruleForm2" :rules="rules" ref="ruleForm2" label-width="110px">
 					  <el-form-item label="原手机号码：" >
-					    <p>{{userInfo.custMobile}}</p>
+					    <p>{{userInfo.repairCustMobile}}</p>
 					  </el-form-item>
 					  <el-form-item label="新手机号码：" prop="newMobile">
 					    <el-input type="text" v-model="ruleForm2.newMobile" auto-complete="off"></el-input>
@@ -337,6 +359,25 @@
       <dialog-order-list ref='dialogOrderList' :visibleObj='visibleObj'></dialog-order-list>
 		</div>
 	</div>
+<!--拒单原因-->
+  <el-dialog title="拒单原因" width='400px' center :visible.sync="innerVisibleWrap" top='20%' :close-on-click-modal ='false' @close="closeFn">
+    <div style="margin-top: -20px;">
+      <el-row>
+        <el-col :span="5">订单编号：</el-col>
+        <el-col :span="19">{{orderId}}</el-col>
+      </el-row>
+      <br>
+      <el-row>
+        <el-col :span="5">拒单原因：</el-col>
+        <el-col :span="19">{{refusalReason}}</el-col>
+      </el-row>
+      <br>
+      <el-row>
+        <el-col :span="5">操作人：</el-col>
+        <el-col :span="19">{{creator}}</el-col>
+      </el-row>
+    </div>
+  </el-dialog>
 </div>
 </template>
 <script>
@@ -349,6 +390,8 @@ export default {
   name: 'allList',
   data() {
   	return {
+      innerVisibleWrap:false,
+      layout:"total, prev, pager, next, jumper",
       visibleObj: {
         dialogTableVisible: false,
         innerVisible:false,
@@ -391,7 +434,7 @@ export default {
 	        rules: {
 	            newMobile: [
 	            	{ required: true, message: '请输入手机号', trigger: 'blur' },
-		          	{ pattern:/^[1]\d{10}$/, message: '手机号为11位数字且以1开头', trigger: 'blur' },
+		          	{ pattern:/^[1][3-9]\d{9}$/, message: '手机号码格式不正确', trigger: 'blur' },
 	          	]
 	        },
 	        currentPage:1,
@@ -399,7 +442,10 @@ export default {
 	  		pageNo: 1,
 	        pageSize: 10,
 	        accountMoney: null,
-	        showPermission: false
+	        showPermission: false,
+      refusalReason: '',
+      orderId:'',
+      creator:'',
       // innerVisible:false
 	  	}
   	},
@@ -433,19 +479,50 @@ export default {
   		// console.log(this.userInfo.gjg)
   	},
   	methods:{
+      closeFn() {
+        this.innerVisibleWrap = false
+        // this.visibleObj.innerVisible = false
+        console.log( this.visibleObj,4555555555555)
+      },
       showDialog(row){ //查看拒单原因
         if(row.status == 5 || row.status == 10) {
-          this.visibleObj.innerVisible = true
+          this.innerVisibleWrap=true
+          this.queryRefusalReasonFn(row.crmApplayId)
+          // this.visibleObj.innerVisible = true
           console.log(this.visibleObj.innerVisible ,'---------------55555555555')
-          this.$emit('showRefuse',row,true)
+          // this.$emit('showRefuse',row,true)
         }
+      },
+      queryRefusalReasonFn(crmApplayId) { // 调取接口拒单原因
+        let pararms = {
+          crmApplayId: crmApplayId
+        }
+        api.queryRefusalReason(pararms).then(res => {
+          if(res.data.success) {
+            this.creator = res.data.data.creator
+            this.orderId = res.data.data.orderId
+            this.refusalReason = res.data.data.refusalReason
+          } else {
+            this.$notify({
+              title: '提示',
+              message: res.data.msg,
+              duration: 1500
+            });
+          }
+        })
       },
 		queryAccountBalanceFn(){//账户余额
 			api.queryAccountBalance({
-				crmCustInfoId:this.$route.query.crmCustInfoId
+				crmCustInfo:this.$route.query.crmCustInfoId
 			}).then(res => {
 				if(res.data.success){
-					this.accountMoney = res.data.data.data
+					this.accountMoney = res.data.data
+				}else{
+					this.$notify({
+              title: '提示',
+              message: '获取失败，请重新获取',
+              duration: 1500
+            });
 				}
 			})
 		},
@@ -464,8 +541,9 @@ export default {
   				crmCustInfo:this.$route.query.crmCustInfoId
   			}).then((res) =>{
   				console.log('jobType',res)
-  				this.userBaseInfo = res.data.data
+  			
 				if (res.data.code==1) {
+					this.userBaseInfo = res.data.data
   					this.jobNature  = res.data.data.jobNature
 				}
 			})
@@ -489,13 +567,18 @@ export default {
 			})
   		},
   		queryOrderList(){
+				
   			api.queryOrderList({
   				pageSize:this.pageSize,
   				pageNo:this.pageNo,
   				crmCustInfo:this.$route.query.crmCustInfoId,
   			}).then((res) =>{
+						this.orderData =[]
+						this.total =0
 				if (res.data.code==1) {
 					this.orderData = res.data.data
+					console.log(this.orderData,1111111111111)
+					// debugger
 					this.total = res.data.total
 				}
 			})
@@ -509,6 +592,7 @@ export default {
 		},
 		handleCurrentChange(val) {
 			this.pageNo = val
+      this.currentPage = val
 			this.queryOrderList()
 	//		console.log(val,88888888)
 		},
@@ -660,10 +744,10 @@ export default {
 				}
 	  		})
   		},
-  		indexMethod(index){
-  			var a = `第${index+1}联系人`
-  			return a;
-  		},
+  		// indexMethod(index){
+  		// 	var a = `第${index+1}联系人`
+  		// 	return a;
+  		// },
   		eyeToggle(){
   			if(this.eye == false){
   				this.eye =true
@@ -692,14 +776,45 @@ export default {
 }
 </script>
 <style lang="less" scoped>
+  .rt{
+    cursor:pointer;
+  }
+  .eyeClosed{
+    cursor:pointer;
+    width:12px;
+    height:12px;
+  }
+  .jobTypeClass{
+    margin: 10px 0;
+    border-bottom: #ccc dotted 1px;
+    padding-bottom: 10px;
+    div{
+      display: inline-block;
+    }
+    span{
+      color:#409EFF;
+      font-size:12px;
+      margin:0 15px;
+    }
+  }
   .disAgree{
     color:red;
   }
 	.top{
 		width: 100%;
-		height: 60px;
-		background: #31AFFF;
+		height: 64px;
+    background: #31AFFF;
+    padding-top: 1px;
 		margin-bottom: 20px;
+		img {
+    	width: 100%;	   
+    }
+    .iconHead {
+	    width: 173px;
+	    height: 48px;
+	    margin-top: 6px;
+	    margin-left: 20px;
+	  }
 	}
 	.detail{
 		width: 1200px;
@@ -729,9 +844,7 @@ export default {
 				float: left;
 				margin:15px 0;
 				width: 200px;
-				span{
-
-				}
+				
 			}
 		}
 		.tabs{

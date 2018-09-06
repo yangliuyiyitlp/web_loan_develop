@@ -1,5 +1,5 @@
 <template>
- <div class="tableList">
+ <div class="tableList resetTable">
  	<el-table
  		 v-loading="loadingTable"
  		stripe
@@ -14,6 +14,13 @@
       type="selection"
      >
     </el-table-column>
+
+    <el-table-column
+      align='center'
+      label="序号"
+      type="index"
+      width="60">
+    </el-table-column>
     <el-table-column
     	:show-overflow-tooltip="true"
 		align='center'
@@ -24,6 +31,7 @@
     	:show-overflow-tooltip="true"
 		align='center'
       prop="custMobile"
+      width="92"
       label="注册手机号"
      >
     </el-table-column>
@@ -31,6 +39,7 @@
     	:show-overflow-tooltip="true"
 		align='center'
       prop="custIc"
+      width="100"
       label="身份证号"
      >
     </el-table-column>
@@ -95,13 +104,14 @@
       label="注册时间">
     </el-table-column>
     <el-table-column
+    	width='65px'
     	v-if='showOrderNumber'
     	:show-overflow-tooltip="true"
 		align='center'
 	    prop="orderNumber"
 	    label="订单数">
       <template slot-scope="scope">
-        <el-button @click="showDialogTableVisible(scope.row)" type="text" size="small" v-if='scope.row.orderNumber != 0'>
+        <el-button class='followColor' @click="showDialogTableVisible(scope.row)" type="text" size="small" v-if='scope.row.orderNumber != 0'>
         	{{scope.row.orderNumber}}
         </el-button>
         <span v-if='scope.row.orderNumber == 0'>{{scope.row.orderNumber}}</span>
@@ -112,15 +122,15 @@
       </template>
     </el-table-column>
     <el-table-column
-
+		width='120px'
     	fixed="right"
     	:show-overflow-tooltip="true"
 		align='center'
 	    prop="address"
 	    label="操作">
       <template slot-scope="scope">
-        <el-button @click="showDialogFollow(scope.row)" type="text" size="small">跟进</el-button>
-        <el-button type="text" size="small" @click="intoDetail(scope.row)">客户详情</el-button>
+        <el-button class='followColor' @click="showDialogFollow(scope.row)" type="text" size="small">跟进</el-button>
+        <el-button class='followColor' type="text" size="small" @click="intoDetail(scope.row)">客户详情</el-button>
       </template>
     </el-table-column>
   </el-table>
@@ -134,72 +144,71 @@
 //import DialogOrderList from '@/components/custManage/dialog/DialogOrderList'
 //import DialogFollow from '@/components/custManage/dialog/DialogFollow'
 export default {
-  	name: 'tableList',
-  	props: {
-  		tableData:{
-  			type: Array,
-  			default: function () {
-  				return []
-  			}
-  		},
-  		loadingTable: {
-  			type: Boolean,
-  			default: false
-  		},
-  		showOrderNumber: {//是否要显示表格的“订单”按钮
-  			type: Boolean,
-  			default: true
-  		},
-  		showSelection: { ////是否要显示表格的“选中”
-  			type: Boolean,
-  			default: true
-  		}
-  	},
-	data() {
-	  	return {
-	  		visibleObj: {
-	  			dialogTableVisible: false,
-	  		},
-	  		dialogFollow: {
-	  			dialogFollowVisible: false,
-	  		},
-	  		multipleSelection: []
-
-	  	}
-	},
-    methods: {
-      intoDetail(row){
-//      this.$router.push({path:'/detail/custDetail',query:{
-//        id:4565465
-//      }})
-        this.$emit('intoDetail',row)
+  name: "tableList",
+  props: {
+    tableData: {
+      type: Array,
+      default: function() {
+        return [];
+      }
+    },
+    loadingTable: {
+      type: Boolean,
+      default: false
+    },
+    showOrderNumber: {
+      //是否要显示表格的“订单”按钮
+      type: Boolean,
+      default: true
+    },
+    showSelection: {
+      ////是否要显示表格的“选中”
+      type: Boolean,
+      default: true
+    }
+  },
+  data() {
+    return {
+      visibleObj: {
+        dialogTableVisible: false
       },
-    	testFn(){
-    		this.$store.dispatch('SET_SELECT_TABLE', [13123312,456])
-    	},
-    	showDialogTableVisible(row) {//订单弹框
-//  		console.log(row.orderNumber,1311233212231)
-			this.$emit('showDialogTableVisible',row,true)
-    	},
-    	showDialogFollow(row) {//跟进弹框
-    		this.$emit('showDialogFollow',row,true)
-    	},
-    	handleSelectionChange(val) {
-	        this.multipleSelection = val;
-	        this.$store.dispatch('SET_SELECT_TABLE', val)
-	        console.log(66,this.multipleSelection)
-	    }
+      dialogFollow: {
+        dialogFollowVisible: false
+      },
+      multipleSelection: []
+    };
+  },
+  methods: {
+    intoDetail(row) {
+      //      this.$router.push({path:'/detail/custDetail',query:{
+      //        id:4565465
+      //      }})
+      this.$emit("intoDetail", row);
     },
-    watch: {
-
+    testFn() {
+      this.$store.dispatch("SET_SELECT_TABLE", [13123312, 456]);
     },
-	components: {
-//		DialogOrderList,
-//		DialogFollow
-	}
-
- }
+    showDialogTableVisible(row) {
+      //订单弹框
+      //  		console.log(row.orderNumber,1311233212231)
+      this.$emit("showDialogTableVisible", row, true);
+    },
+    showDialogFollow(row) {
+      //跟进弹框
+      this.$emit("showDialogFollow", row, true);
+    },
+    handleSelectionChange(val) {
+      this.multipleSelection = val;
+      this.$store.dispatch("SET_SELECT_TABLE", val);
+      console.log(66, this.multipleSelection);
+    }
+  },
+  watch: {},
+  components: {
+    //		DialogOrderList,
+    //		DialogFollow
+  }
+};
 </script>
 <style scoped lang="less">
-
 </style>

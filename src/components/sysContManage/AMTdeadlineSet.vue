@@ -1,6 +1,6 @@
 <template>
  <div class="limt_money_wrap">
- 	<tit-common :title='title'></tit-common>
+ 	<!--<tit-common :title='title'></tit-common>-->
  	<div class="limt_money_con">
  		<el-row>
 			<el-form :rules="rules" ref="formLabelAlign"  :label-position="labelPosition" label-width="120px" :model="formLabelAlign">
@@ -59,10 +59,10 @@
 </template>
 
 <script>
-import TitCommon from '@/components/common/TitCommon'
+//import TitCommon from '@/components/common/TitCommon'
 import api from '@/api/index'
 export default {
-  	name: 'AMTdeadlineSet',
+  	name: 'SYC_AMTdeadlineSet',
   	props: {
 //		tableData:{
 //			type: Array,
@@ -111,7 +111,7 @@ export default {
         	} else if(value%100 != 0) {
         		return callback(new Error('请输入100的倍数'));
         	} else if (Number(value) > Number(this.formLabelAlign.amountMax)) {
-	          	return callback(new Error('必须小于金额最大值'));
+	          	return callback(new Error('必须小于等于金额最大值'));
 	        } else {
 	        	callback();
 	        }
@@ -161,7 +161,7 @@ export default {
         	} else if(!value) {
         		return callback(new Error('不能为空'));
         	} else if (Number(value) > Number(this.formLabelAlign.periodMax)) {
-	          	return callback(new Error('必须小于期限最大值'));
+	          	return callback(new Error('必须小于等于期限最大值'));
 	        } else {
 	        	callback();
 	        }
@@ -331,7 +331,7 @@ export default {
         },
     },
 	components: {
-	  	TitCommon
+//	  	TitCommon
 	}
  }
 </script>

@@ -1,6 +1,6 @@
 <template>
   <div class="allCustList table-wraps android">
-    <TitCommon :title='title'></TitCommon>
+    <!--<TitCommon :title='title'></TitCommon>-->
     <el-row  type="flex" >
       <el-col  class="searchbox">
         <el-form :inline="true" :model="formInline" class="demo-form-inline">
@@ -20,12 +20,12 @@
       </el-col>
     </el-row>
     <div class="custListWrap">
-      <div class="table-wrap mrtop20">
+      <div class="table-wrap resetTable">
         <el-table
           :data="tableData"
           border
           style="width: 100%">
-          <el-table-column align='center' type="index"  width="60" label="序号" >
+          <el-table-column align='center' type="index"  width="80" label="序号" >
 
           </el-table-column>
           <el-table-column
@@ -107,7 +107,7 @@
           </el-upload>
         </el-form-item>
         <el-form-item label="版本号：" prop="version"  >
-          <el-input  class='titleTip' v-model.trim="addForm.version" ></el-input>&nbsp;&nbsp;<a href="javascript:void(0)" class="androidTip">版本号不可重复</a>
+          <el-input  class='titleTip' v-model.trim="addForm.version" @input='versionChange'></el-input>&nbsp;&nbsp;<a href="javascript:void(0)" class="androidTip">版本号不可重复</a>
         </el-form-item>
         <el-form-item label="是否强制更新：" prop="status"  >
           <el-radio-group v-model="addForm.status">
@@ -133,10 +133,12 @@
 
 <script>
   import api from '@/api/index.js'
-  import TitCommon from '@/components/common/TitCommon'
+  import pageSize from "@/api/myPageSize"
+
+//import TitCommon from '@/components/common/TitCommon'
   import Pagination from '@/components/common/Pagination'
   export default {
-    name: 'AndroidVersionControl',
+    name: 'SYP_AndroidVersionControl',
     data() {
       const validateFileAddress = (rule, value, callback) => {
         console.log(789,value);
@@ -177,7 +179,7 @@
             { min: 1, max: 100, message: '更新说明长度100以内', trigger: 'blur'}
           ],
           url:[
-            {required:true, message: '请上传文件', trigger: 'blur' }
+            {required:true, message: '请上传文件', trigger: 'change' }
           ]
           // fileAddress:[
           //   {validator: validateFileAddress, trigger: 'blur,change'}
@@ -189,19 +191,27 @@
       }
     },
     created() {
+      if( pageSize.getMyPageSize(this.pageSize)){
+        this.pageSize=pageSize.getMyPageSize(this.pageSize)
+      }
 //  	console.log(this.fileUpLoad,'90000000')
-		 	if (JSON.parse(localStorage.getItem('myPageSize'))) {
-		 		this.pageSize = JSON.parse(localStorage.getItem('myPageSize')).W_AndroidVersionControl?JSON.parse(localStorage.getItem('myPageSize')).W_AndroidVersionControl:10
-		 		console.log(JSON.parse(localStorage.getItem('myPageSize')).W_AndroidVersionControl)
-		 	} else {
-		 		let obj = {}
-		 		localStorage.setItem('myPageSize',JSON.stringify(obj))
-		 	}
+// 		 	if (JSON.parse(localStorage.getItem('myPageSize'))) {
+// 		 		this.pageSize = JSON.parse(localStorage.getItem('myPageSize')).W_AndroidVersionControl?JSON.parse(localStorage.getItem('myPageSize')).W_AndroidVersionControl:10
+// 		 		console.log(JSON.parse(localStorage.getItem('myPageSize')).W_AndroidVersionControl)
+// 		 	} else {
+// 		 		let obj = {}
+// 		 		localStorage.setItem('myPageSize',JSON.stringify(obj))
+// 		 	}
 		},
     mounted(){
       this.queryAndroidVersion()
     },
     methods: {
+      versionChange(val){ // 版本号只能输入数字和小数点
+        this.$nextTick(()=>{    
+          this.addForm.version = val.replace(/[^\d\.]/g,'')
+        },20)
+      },
       add(){
         this.buttonLoading = false;
         this.banner_DialogVisible =true
@@ -212,9 +222,11 @@
 
       search(data) {
         this.pageNo = 1
+        this.currentPage = 1
         this.queryAndroidVersion()
       },
       queryAndroidVersion(){
+        
         const pararms = {
           pageNo:this.pageNo,
           pageSize:this.pageSize,
@@ -222,6 +234,8 @@
         }
         console.log('==============')
         api.queryAndroidVersion(pararms).then(res=>{
+            this.total =0
+            this.tableData = []
           console.log(res)
           if(res.data.code == 1){
             this.total = res.data.total;
@@ -351,9 +365,11 @@
       },
       handleSizeChange(val) {
       	this.currentPage = 1
-				let myPageSize = JSON.parse(localStorage.getItem('myPageSize'))
-  			myPageSize.W_AndroidVersionControl = val
-	 			localStorage.setItem('myPageSize',JSON.stringify(myPageSize))
+        this.pageNo = 1
+        pageSize.setMyPageSize(val)
+				// let myPageSize = JSON.parse(localStorage.getItem('myPageSize'))
+  			// myPageSize.W_AndroidVersionControl = val
+	 			// localStorage.setItem('myPageSize',JSON.stringify(myPageSize))
         this.pageSize = val
         this.queryAndroidVersion();
       },
@@ -365,7 +381,7 @@
     },
 
     components: {
-      TitCommon,
+//    TitCommon,
       Pagination
     }
 

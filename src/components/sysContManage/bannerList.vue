@@ -1,6 +1,6 @@
 <template>
  <div class="allCustList table-wraps">
- 	<TitCommon :title='title'></TitCommon>
+ 	<!--<TitCommon :title='title'></TitCommon>-->
  	<el-row  type="flex" >
 	  <el-col  class="searchbox">
 	  		<el-form :inline="true" :model="formInline" class="demo-form-inline">
@@ -38,12 +38,12 @@
 	  </el-col>
 	</el-row>
  	<div class="custListWrap">
- 		<div class="table-wrap mrtop20">
+ 		<div class="table-wrap resetTable">
  			<el-table
 		      :data="tableData"
 		      border
 		      style="width: 100%">
-		      <el-table-column align='center' type="index"  width="60" label="序号" >
+		      <el-table-column align='center' type="index"  width="80" label="序号" >
 
 		      </el-table-column>
 		      <el-table-column
@@ -145,7 +145,7 @@
  		</div>
  	</div>
  	<el-dialog :title="addModify_title" :visible.sync="banner_DialogVisible" width="700px"   @close="addDiaClose" :close-on-click-modal ='false'>
- 		<el-form label-width="130px" ref="addForm" :model="addForm" class="demo-form-inline" :rules="addForm_rules">
+ 		<el-form label-width="100px" ref="addForm" :model="addForm" class="demo-form-inline" :rules="addForm_rules">
 	        <el-form-item label="标题" prop="title"  >
 	           <el-input  v-model.trim="addForm.title" :maxlength="50" @input="activityNameFn"></el-input>
 	        </el-form-item>
@@ -192,8 +192,8 @@
 				  <i v-else class="el-icon-plus avatar-uploader-icon"></i>
 				</el-upload>
 				<div style="margin-left: 200px;">
-					<p>尺寸比例：   长:宽  1.85  :  1</p>
-					<p>推荐图尺寸：      长*宽 750px*404px   分辨率72</p>
+					<p>尺寸比例：   长:宽  2.5  :  1</p>
+					<p>推荐图尺寸：      长*宽 702px*280px   分辨率72</p>
 					<p>文件大小：    3M以内</p>
 				</div>
 			</el-form-item>
@@ -201,7 +201,7 @@
 	           <el-input  v-model.trim="addForm.describe" :maxlength="50" ></el-input>
 	        </el-form-item>
 	        <el-form-item label="排序数字" prop="reorder"  >
-	            <el-input  @input="chenkNum" v-model="addForm.reorder"  :min="0" :max="999999999" label="排序数字"></el-input>
+	            <el-input  @input="chenkNum" v-model="addForm.reorder"  :min="0" :max="999999999" label="排序数字" class='bannerAddInput'></el-input><span>*数字越大排序越靠前</span>
 	            <!--<el-input-number ></el-input-number>-->
 	           <!-- <el-select v-model="addForm.activityCompName" placeholder="活动归属" :readonly="orign_disabled">
 	            	<el-option v-for="item in BranchCompany" :key="item.name" :label="item.name" :value="item.name" @click.native = 'selectFn2(item)'></el-option>
@@ -226,11 +226,13 @@
 
 <script>
 import api from '@/api/index.js'
-import TitCommon from '@/components/common/TitCommon'
+import pageSize from "@/api/myPageSize"
+
+//import TitCommon from '@/components/common/TitCommon'
 import TableList from '@/components/custManage/TableList'
 import Pagination from '@/components/common/Pagination'
 export default {
-  name: 'allList',
+  name: 'SYC_BannerList',
   data() {
   	const validateImgAddress = (rule, value, callback) => {
       if (value === '') {
@@ -367,14 +369,16 @@ export default {
   	}
   },
  created() {
-
- 	if (JSON.parse(localStorage.getItem('myPageSize'))) {
- 		this.pageSize = JSON.parse(localStorage.getItem('myPageSize')).W_bannerList?JSON.parse(localStorage.getItem('myPageSize')).W_bannerList:10
- 		console.log(JSON.parse(localStorage.getItem('myPageSize')).W_bannerList)
- 	} else {
- 		let obj = {}
- 		localStorage.setItem('myPageSize',JSON.stringify(obj))
- 	}
+   if( pageSize.getMyPageSize(this.pageSize)){
+     this.pageSize=pageSize.getMyPageSize(this.pageSize)
+   }
+ 	// if (JSON.parse(localStorage.getItem('myPageSize'))) {
+ 	// 	this.pageSize = JSON.parse(localStorage.getItem('myPageSize')).W_bannerList?JSON.parse(localStorage.getItem('myPageSize')).W_bannerList:10
+ 	// 	console.log(JSON.parse(localStorage.getItem('myPageSize')).W_bannerList)
+ 	// } else {
+ 	// 	let obj = {}
+ 	// 	localStorage.setItem('myPageSize',JSON.stringify(obj))
+ 	// }
  },
   mounted(){
 		this.queryBannerList();
@@ -385,6 +389,7 @@ export default {
   	search(data) {
   		console.log(778787878)
   		this.pageNo = 1
+      this.currentPage = 1
   		// this.pageSize = 10
 
   		this.queryBannerList()
@@ -397,8 +402,11 @@ export default {
 			status:this.formInline.state,
 			channel:this.formInline.channel
  		}
-  		console.log('==============')
+			console.log('==============')
+				
  		api.queryBannerList(pararms).then(res=>{
+			 this.total = 0
+ 				this.tableData =[]
  			console.log(res)
  			if(res.data.code == 1){
  				this.total = res.data.total;
@@ -509,11 +517,14 @@ console.log(isPng,isLt2M,files.size / 1024 / 1024,'-------------')
 		},20)
 	},
   	handleSizeChange(val) {
+      pageSize.setMyPageSize(val)
 
-		let myPageSize = JSON.parse(localStorage.getItem('myPageSize'))
-  		myPageSize.W_bannerList = val
-	 	localStorage.setItem('myPageSize',JSON.stringify(myPageSize))
+		// let myPageSize = JSON.parse(localStorage.getItem('myPageSize'))
+  		// myPageSize.W_bannerList = val
+	 	// localStorage.setItem('myPageSize',JSON.stringify(myPageSize))
 		this.pageSize = val
+      this.pageNo = 1
+      this.currentPage = 1
 		this.queryBannerList();
 
 //		console.log(val,777777777777)
@@ -552,8 +563,7 @@ console.log(isPng,isLt2M,files.size / 1024 / 1024,'-------------')
 					imgAddress:this.addForm.imgAddress,
 					describe:this.addForm.describe
             	}).then(res=>{
-            		this.buttonLoading = false;
-		 			console.log(res)
+								console.log(77,res)
 		 			if(res.data.code == 1){
 		 				this.queryBannerList()
 		 				this.$message.success(res.data.msg);
@@ -561,9 +571,14 @@ console.log(isPng,isLt2M,files.size / 1024 / 1024,'-------------')
 		 			}else{
 		 				this.$message.error(res.data.msg)
 		 			}
-
-
-		 		})
+		 		}).catch((err)=>{
+					 if(err.response.data.message){
+	this.$message.error(err.response.data.message)
+					 }
+					 
+						//  console.log(88,err.response)
+				 })
+				 	this.buttonLoading = false;
             }
 		})
 	},
@@ -617,7 +632,7 @@ console.log(isPng,isLt2M,files.size / 1024 / 1024,'-------------')
   },
 
   components: {
-  	TitCommon,
+//	TitCommon,
   	TableList,
   	Pagination
   }
@@ -625,6 +640,9 @@ console.log(isPng,isLt2M,files.size / 1024 / 1024,'-------------')
  }
 </script>
 <style  lang="less" >
+.bannerAddInput{
+	width:424px;
+}
 .wordDes {
 	float: left;
 }
@@ -663,5 +681,11 @@ console.log(isPng,isLt2M,files.size / 1024 / 1024,'-------------')
 	top:-99999px;
 	left: -99999px;
 	z-index: -99999;
+  }
+  .highLight_cursor{
+    word-wrap:break-word;
+  }
+  .searchbox button {
+  	    border-radius: 0;
   }
 </style>

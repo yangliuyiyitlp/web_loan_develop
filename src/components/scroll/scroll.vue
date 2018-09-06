@@ -256,6 +256,9 @@
     background: #fff;*/
     overflow: hidden;
     width: 100%;
+    position: relative;
+    top: -1px;
+    border-bottom: 1px solid #c4c0c0;
 }
 .pulldown-refesh {
 	position: absolute;

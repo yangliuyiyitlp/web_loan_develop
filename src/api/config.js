@@ -10,10 +10,10 @@ var cfg = {
     // dev: 'http://192.168.21.178:8080/microcredit', //huang--代理
 //  dev: 'http://192.168.21.145:8080/microcredit',//陶辉
 //  dev: 'http://172.16.10.179:8081/microcredit', //test
-//  dev: 'http://192.168.21.39:8080/microcredit', //张琪
+//  dev: 'http://192.168.21.149:8080/microcredit', //张琪
 //     dev: 'http://192.168.23.79:8080/microcredit', //费新伟
     dev: 'http://116.236.220.213:18881/microcredit',    //sit
-  // dev: 'http://192.168.21.178:8080/microcredit',    //黄正刚本地
+//   dev: 'http://192.168.21.178:8080/microcredit',    //黄正刚本地
 
 //
 //http://172.16.10.179:8081
@@ -32,6 +32,9 @@ var baseurlVerifyImg = '';
 switch (process.env.NODE_ENV) {
     case "development":
         base_url = cfg.dev;
+
+
+
         base_url_download = cfg.dev_download;
         baseurlVerifyImg = cfg.dev_baseurlVerifyImg
         break;

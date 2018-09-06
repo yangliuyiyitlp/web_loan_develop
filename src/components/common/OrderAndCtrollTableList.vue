@@ -1,5 +1,5 @@
 <template>
- <div class="tableList">
+ <div class="tableList resetTable">
  	<el-table
  		 v-loading="loadingTable"
  		stripe
@@ -8,23 +8,17 @@
 	    style="width: 100%"
       @selection-change="handleSelectionChange"
 	    >
-      <!--<el-table-column
-      	v-if='showSelection'
-      	align='center'
-      type="selection"
-      width="55">
-    </el-table-column>-->
-    <el-table-column
-      v-if="tablePermisson.showSelection"
-      align='center'
-      type="selection"
-      width="55">
-    </el-table-column>
+    <!--<el-table-column-->
+      <!--v-if="tablePermisson.showSelection"-->
+      <!--align='center'-->
+      <!--type="selection"-->
+    <!--</el-table-column>-->
+    <el-table-column align="center" :selectable='checkboxT' type="selection"  fixed="left"   v-if="tablePermisson.showSelection"  disabled></el-table-column>
     <el-table-column
     align='center'
     label="序号"
     type="index"
-    width="55">
+    width="60">
     </el-table-column>
     <el-table-column
       v-if = 'tablePermisson.applyTime'
@@ -33,6 +27,7 @@
       	prop="applyTime"
       	label="申请时间">
     </el-table-column>
+    <!--总控订单 START-->
     <el-table-column
       v-if = 'tablePermisson.applicationTime'
       :show-overflow-tooltip="true"
@@ -40,6 +35,7 @@
       prop="applicationTime"
       label="申请时间">
     </el-table-column>
+    <!--总控订单 END-->
     <el-table-column
     	v-if = 'tablePermisson.systemResidenceTime'
     	:show-overflow-tooltip="true"
@@ -140,15 +136,15 @@
     	:show-overflow-tooltip="true"
 		align='center'
       prop="custIc"
-      label="身份证号码"
-      width="120">
+      label="身份证号"
+      width="100">
     </el-table-column>
     <el-table-column
     	:show-overflow-tooltip="true"
 		align='center'
       prop="custMobile"
       label="手机号码"
-      width="120">
+      width="100">
     </el-table-column>
     <el-table-column
       v-if='tablePermisson.hangStatus'
@@ -158,13 +154,12 @@
       label="挂起状态"
       width="120">
       <template slot-scope="scope">
-        <span v-if="scope.row.hangStatus  == 1 || scope.row.hangStatus==2" >挂起</span>
+        <span v-if="scope.row.hangStatus  == 1 || scope.row.hangStatus==2" class='cursorTip' @click="openDialogControlReasonFn(scope.row)">挂起</span>
         <span v-else>正常</span>
       </template>
     </el-table-column>
 
     <el-table-column
-
     	v-if='tablePermisson.orderStatus'
     	:show-overflow-tooltip="true"
 		align='center'
@@ -177,7 +172,7 @@
 	    	<span
 	    		@click="openDialogOrder(scope.row)"
 	    		v-if='(scope.row.orderStatus == 1) && (scope.row.hangStatus == 1 || scope.row.hangStatus == 2)'>
-	    		申请中<i style="color: red;">(挂)</i>
+	    		申请中<i class="cursorTip">(挂)</i>
 	    	</span>
 	    	<span
 	    		v-if='(scope.row.orderStatus == 2 || scope.row.orderStatus == 6 || scope.row.orderStatus == 7 || scope.row.orderStatus == 8 || scope.row.orderStatus == 9) && (scope.row.hangStatus != 1 && scope.row.hangStatus != 2)'
@@ -187,14 +182,14 @@
 	    	<span
 	    		@click="openDialogOrder(scope.row)"
 	    		v-if='(scope.row.orderStatus == 2 || scope.row.orderStatus == 6 || scope.row.orderStatus == 7 || scope.row.orderStatus == 8 || scope.row.orderStatus == 9) && (scope.row.hangStatus == 1 || scope.row.hangStatus == 2)'>
-	    		审批中<i style="color: red;">(挂)</i>
+	    		审批中<i class="cursorTip">(挂)</i>
 	    	</span>
 
 	    	<span v-if='scope.row.orderStatus == 3'>还款中</span>
 	    	<span v-if='scope.row.orderStatus == 4'>已结清</span>
 	    	<span
 	    		v-if='(scope.row.orderStatus == 5 || scope.row.orderStatus == 10)'
-	    		style="color: red;"
+	    		class="cursorTip"
 	    		@click="openDialogOrder(scope.row)">
 	    		拒绝
 	    	</span>
@@ -202,19 +197,17 @@
 
     </el-table-column>
     <el-table-column
-
       v-if='tablePermisson.orderStatusControl'
       :show-overflow-tooltip="true"
       align='center'
       prop="custIc"
-      label="状态"
+      label="订单状态"
       width="100px">
       <template slot-scope="scope">
         <!--1申请中,2审批中,3还款中,4已结清,5拒绝,    (6线上筹 资中,7满标,8满标以放款,9流标,) 审批中 10退件 （拒绝）-->
-        <span 	@click="openDialogOrder(scope.row)" v-if='scope.row.orderStatus == 1 && (scope.row.hangStatus != 1 && scope.row.hangStatus != 2)'>申请中</span>
-
+        <span  v-if='scope.row.orderStatus == 1 '>申请中</span>
         <span
-          v-if='(scope.row.orderStatus == 2 || scope.row.orderStatus == 6 || scope.row.orderStatus == 7 || scope.row.orderStatus == 8 || scope.row.orderStatus == 9) && (scope.row.hangStatus != 1 && scope.row.hangStatus != 2)'
+          v-if='scope.row.orderStatus == 2 || scope.row.orderStatus == 6 || scope.row.orderStatus == 7 || scope.row.orderStatus == 8 || scope.row.orderStatus == 9'
         >
 	    		审批中
 	    	</span>
@@ -223,7 +216,7 @@
         <span v-if='scope.row.orderStatus == 4'>已结清</span>
         <span
           v-if='(scope.row.orderStatus == 5 || scope.row.orderStatus == 10)'
-          style="color: red;"
+          class="cursorTip"
           @click="openDialogOrder(scope.row)">
 	    		拒绝
 	    	</span>
@@ -277,10 +270,10 @@
     prop="address"
     label="订单详情">
     <template slot-scope="scope">
-      <el-button  v-if='scope.row.orderStatus == 4' type="text" disabled>查看</el-button >
+      <el-button  v-if='scope.row.orderStatus == 4' type="text" disabled class='fs12'>查看</el-button >
       <el-button
         v-if='scope.row.orderStatus != 4'
-        @click="showOrderDetail(scope.row)" type="text" size="small">查看</el-button>
+        @click="showOrderDetail(scope.row)" type="text" size="small" class='followColor fs12'>查看</el-button>
     </template>
   </el-table-column>
     <el-table-column
@@ -291,8 +284,8 @@
       align='center'
       prop="address"
       label="操作">
-      <template slot-scope="scope">
-        <el-button  @click="modifyReject(scope.row)" type="text" >拒绝</el-button >
+      <template slot-scope="scope" v-if="scope.row.refuseBtnStatus ==1">
+        <el-button  @click="modifyReject(scope.row)" type="text" class='followColor fs12' :disabled='scope.row.reviewRefuseReliveStatus == 1'>拒绝</el-button >
       </template>
     </el-table-column>
   </el-table>
@@ -321,12 +314,39 @@
 			</el-row>
 		</div>
 	</el-dialog>
+	<!--总控管理--》审批订单列表--》挂起原因-->
+	<el-dialog title="挂起原因" width='400px' center :visible.sync="dialogApplyControl"  top='20%' :close-on-click-modal ='false'>
+	  <div class="" style='margin-top: -25px;'>
+		  	<el-row>
+		  		<el-row>
+		  			<el-col :span="5" >订单编号：</el-col>
+		  			<el-col :span="19" >{{controlHangUpObj.orderNum}}</el-col>
+		  		</el-row>
+          <br>
+				<el-row>
+					<el-col :span="5" >挂起原因：</el-col>
+					<el-col :span="19" >{{controlHangUpObj.hangReason}}</el-col>
+				</el-row>
+          <br>
+				<el-row>
+					<el-col :span="5" >环节：</el-col>
+					<el-col :span="19" >{{controlHangUpObj.nodeName}}</el-col>
+				</el-row>
+          <br>
+				<el-row>
+					<el-col :span="5" >操作人：</el-col>
+					<el-col :span="19" >{{controlHangUpObj.creator}} </el-col>
+				</el-row>
+			</el-row>
+		</div>
+	</el-dialog>
 	<el-dialog title="拒单原因" width='400px' center :visible.sync="dialogRefused" top='20%' :close-on-click-modal ='false'>
 	  	<div class="" style='margin-top: -25px;'>
 		  	<el-row>
 		  		<el-row>
 		  			<el-col :span="5" >订单编号：</el-col>
-		  			<el-col :span="19" >{{objRefresed.orderId}}</el-col>
+		  			<!--<el-col :span="19" >{{orderNumber}}</el-col>-->
+		  			<el-col :span="19" >{{objRefresed.orderNumber}}</el-col>
 		  		</el-row>
           <br>
 				<el-row>
@@ -372,8 +392,8 @@ export default {
             hangStatus:false, //挂起状态
             rejectBtn:false, //拒绝
             showSelection:false,
-            applicationTime:false,//申请时间2
-            applyTime:true //申请时间
+            applicationTime:false,//控制总控管理的table的字段
+            applyTime:true//控制订单管理的table的字段
           }
   			}
   		},
@@ -398,8 +418,18 @@ export default {
   	},
 	data() {
 	  	return {
+        //复选框. refuseBtnStatus 1 可以有拒绝 0 不可有拒绝  reviewRefuseReliveStatus 1处理中
+        checkboxT(row,index){
+          // if(row.refuseBtnStatus ==1 ){
+          if(row.refuseBtnStatus ==1 && row.reviewRefuseReliveStatus != 1){
+            return 1;
+          }else{
+            return 0;
+          }
+        },
 	  		dialogApply: false,
 	  		dialogRefused: false,
+	  		dialogApplyControl: false,
 	  		visibleObj: {
 	  			dialogTableVisible: false,
 	  		},
@@ -412,12 +442,15 @@ export default {
 		  		subcategories: '',
 		  		creator: ''
 	  		},
-	  		hangUpObj:{}
+	  		hangUpObj:{},
+	  		controlHangUpObj: {},
+        orderNumber:''
 
 	  	}
 	},
     methods: {
     	openDialogOrder(row) {
+        // this.orderNumber  = row.orderNumber // 订单编号
     		if(row.orderStatus == 5 || row.orderStatus == 10) {
       			this.dialogRefused = true
       			this.queryRefusalReasonFn(row.applyId)
@@ -433,17 +466,23 @@ export default {
 //this.dialogApply = true
     		console.log(row)
     	},
+    	openDialogControlReasonFn(row) {
+    		this.dialogApplyControl = true
+    		this.hangupReasonFn(row.crmApplayId)
+    	},
     	hangupReasonFn(crmApplayId) {
     		let pararms = {
     			crmApplayId: crmApplayId
     		}
     		this.hangUpObj = {orderNum:''}
+    		this.controlHangUpObj = {}
     		api.hangupReasonFn({crmApplayId}).then(res => {
 				if(res.data.success) {
 //					console.log(res.data.data)
 					this.hangUpObj = Object.assign(this.hangUpObj, res.data.data)
+					this.controlHangUpObj = Object.assign(this.controlHangUpObj, res.data.data)
 					console.log(res.data.data,88888888888888888)
-					console.log(this.hangUpObj,88888888888888888)
+					console.log(this.controlHangUpObj,88888888888888888)
 				} else {
 					this.$notify({
 			           title: '提示',
@@ -488,7 +527,18 @@ export default {
     		this.$emit('showOrderDetail',row,true)
     	},
       modifyReject(row){this.$emit('modifyReject',row)},
- 	handleSelectionChange(val) {
+ 	 handleSelectionChange(val) {
+     const statusArr =[] // 统一拒单只能是一种状态
+     val.forEach((value, index)=>{
+       statusArr.push(value.orderStatus)
+     })
+     if (statusArr.indexOf('1') !== -1 && (statusArr.indexOf('2') !== -1 ||statusArr.indexOf('6') !== -1|| statusArr.indexOf('7') !== -1||statusArr.indexOf('8') !== -1||statusArr.indexOf('9') !== -1)){
+       this.$store.dispatch('SET_REFUSE_BTN', true)
+     }else{
+       this.$store.dispatch('SET_REFUSE_BTN', false)
+     }
+
+
     console.log(77,val);
     this.multipleSelection = val;
 	        this.$store.dispatch('SET_CONTROL_TABLE', val)
@@ -510,4 +560,8 @@ export default {
     margin-bottom: 5px;
     font-size: 14px;
 }
+  .cursorTip{
+    color:red;
+    cursor:pointer;
+  }
 </style>

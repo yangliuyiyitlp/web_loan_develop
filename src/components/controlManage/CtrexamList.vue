@@ -1,6 +1,6 @@
 <template>
   <div class="allCustList">
-    <TitCommon :title='title'></TitCommon>
+    <!--<TitCommon :title='title'></TitCommon>-->
     <div class="custListWrap">
       <search
         ref='search'
@@ -34,24 +34,36 @@
       <!--拒绝弹框-->
       <div>
         <!--<dialog-follow :dialogFollow='dialogFollow' :rowFollowId = 'rowFollowId' ref="childDialogFollow" :multipleSelectionIdList="multipleSelectionIdList"></dialog-follow>-->
-        <el-dialog title="拒单" width='450px'  center :visible.sync="dialogFollow.dialogFollowVisible" :close-on-click-modal="false">
+        <el-dialog title="拒单" width='550px'  center :visible.sync="dialogFollow.dialogFollowVisible" :close-on-click-modal="false">
           <el-form :model="form" ref="form" :rules="form_rules">
-            <el-form-item label="订单编号：">
+            <el-form-item label="订单编号：" class="formNum" v-if="orderNo">
               <div  class="line-limit-length">{{orderNumber}}</div >
             </el-form-item>
-            <el-form-item label="拒单原因：" prop="rejectReasonNumber" class="rejectInfo">
-              <el-select v-model="form.a" class="proviceCity" placeholder="请选择" @change='changeHead' clearable >
-                <!--<el-option v-for = '(val,ind) in applyProvince' :label='val.provinceName' :value="val.id" :key='ind'></el-option>-->
+            <el-form-item label="拒单原因："  prop="refuseReason" class="rejectInfo">
+              <el-form-item class="proviceCity">
+              <el-select v-model="form.categories"  placeholder="请选择" @change='changeHead' clearable >
+                <el-option v-for = '(val,ind) in reasonFirst' :label='val.value' :value="val.code" :key='ind'></el-option>
               </el-select>
-              <el-select v-model="form.b" class="proviceCity" placeholder="请选择" @change='changeInfo' clearable >
-                <!--<el-option v-for = '(val,ind) in applyCity' :label='val.cityName' :value="val.id" :key='ind'></el-option>-->
+              </el-form-item>
+              <!--<el-form-item class="applyCity" >-->
+              <!--<el-select v-model="form.subcategories" placeholder="请选择" @change='changeInfo' clearable >-->
+                <!--<el-option v-for = '(val,ind) in reasonSecond' :label='val.value' :value="val.code" :key='ind'></el-option>-->
+              <!--</el-select>-->
+              <!--</el-form-item>-->
+              <el-form-item class="applyCity" >
+                <el-select v-model="form.subcategories" placeholder="请选择" value-key="code" @change='changeInfo' clearable >
+                  <el-option v-for = 'val in reasonSecond' :label='val.value' :value="val" :key='val.code'></el-option>
+                </el-select>
+              </el-form-item>
+              <el-form-item  class="applyArea" >
+              <el-select v-model="form.refuseReason" placeholder="请选择" value-key="code" clearable>
+                <el-option v-for = 'val in reasonThree' :label='val.value' :value="val" :key='val.code'></el-option>
               </el-select>
-              <el-select v-model="form.rejectReasonNumber" class="proviceCity" placeholder="请选择" clearable>
-                <!--<el-option v-for = '(val,ind) in applyArea' :label='val.districtName' :value="val.id" :key='ind'></el-option>-->
-              </el-select>
+              </el-form-item>
             </el-form-item>
+
             <el-form-item label="备注说明：" prop="remark" class="textPro">
-              <el-input type="textarea" v-model.trim="form.remark" :maxlength = '200' ></el-input>
+              <el-input type="textarea" v-model.trim="form.remark" :maxlength = '200'  :autosize="{ minRows: 4}"></el-input>
             </el-form-item>
           </el-form>
 
@@ -70,15 +82,25 @@
 
 <script>
   import api from "@/api/index"
-  import TitCommon from '@/components/common/TitCommon'
+  import pageSize from "@/api/myPageSize"
+
+  //import TitCommon from '@/components/common/TitCommon'
   import Pagination from '@/components/common/Pagination'
-  import TableList from '@/components/orderManage/TableList'
+  import TableList from '@/components/common/OrderAndCtrollTableList'
   import Search from '@/components/controlManage/ControlSearch'
   // import DialogFollow from '@/components/controlManage/DialogCtrall'
 
   export default {
-    name: 'CtrexamList',
+    name: 'CT_CtrexamList',
     data() {
+      // var validateCon = (rule, value, callback) => {
+      //   if (!value.code ) {
+      //    return  callback(new Error('请选择拒单原因'));
+      //   } else {
+      //     callback();
+      //   }
+      // };
+
       return {
         title: '审批中订单',
         currentPage:1,
@@ -91,29 +113,44 @@
         zTreeData: [],
         treeData: [],
         loadingTable: false,
+        orderNo:true,
         multipleSelectionIdList:"",
+        orderStatus:'',
         orderNumber:'',
         dialogFollow: {
           dialogFollowVisible: false
 
         },
-        productState: [{name:"申请中",id:"1"},{name:"审批中",id:"2"}],
+        productState: [{name:"申请中",id:"1"},{name:"审批中",id:"2,6,7,8,9"}],
         saveFollow:false,
         formLabelWidth: '80px',
         form: {
           crmApplayId: '',
           remark: '',
           rejectReasonNumber: '',
-          rejectReason: ''
+          rejectReason: '',
+          subcategories:{},
+          refuseReason:{}
         },
         form_rules:{
           remark:[
             {required:true, message: '请输入备注说明', trigger: 'blur,change' }
           ],
-          // rejectReasonNumber:[
-          //   {required:true, message: '请选择拒单原因', trigger: 'blur,change' }
-          // ]
+          // categories: [
+          //   {   required: true, message: '请选择拒单原因', trigger: 'change' },
+          // ],
+          // subcategories: [
+          //   {   required: true, message: '请选择拒单原因', trigger: 'change' },
+          // ],
+          refuseReason: [
+            {   required: true, message: '请选择拒单原因', trigger: 'change' },
+            // { validator: validateCon, trigger: 'blur,change' }
+          ]
         },
+        reasonFirst:[],
+        reasonSecond:[],
+        reasonThree:[],
+        categories:''
       }
     },
 
@@ -155,28 +192,80 @@
       this.$refs.search.checkOrderNodeFn()
     },
     created() {
-      if (JSON.parse(localStorage.getItem('myPageSize'))){
-        this.pageSize = JSON.parse(localStorage.getItem('myPageSize')).C_ControlList?JSON.parse(localStorage.getItem('myPageSize')).C_ControlList:10
-        console.log(JSON.parse(localStorage.getItem('myPageSize')).C_ControlList)
-      } else {
-        let obj = {}
-        localStorage.setItem('myPageSize',JSON.stringify(obj))
+      if( pageSize.getMyPageSize(this.pageSize)){
+        this.pageSize=pageSize.getMyPageSize(this.pageSize)
       }
+      // if (JSON.parse(localStorage.getItem('myPageSize'))){
+      //   this.pageSize = JSON.parse(localStorage.getItem('myPageSize')).C_ControlList?JSON.parse(localStorage.getItem('myPageSize')).C_ControlList:10
+      //   console.log(JSON.parse(localStorage.getItem('myPageSize')).C_ControlList)
+      // } else {
+      //   let obj = {}
+      //   localStorage.setItem('myPageSize',JSON.stringify(obj))
+      // }
     },
     methods: {
-      changeHead(){},
-      changeInfo(){},
-      confirm_follow(form){ // TODO 拒单
+      reviewRefuseReason(){//拒单原因一级
+        api.ReviewRefuseReason({type:'1'}).then(res => {
+          if(res.data.code ==1) {
+            this.reasonFirst = res.data.data
+          } else {
+            this.$notify({
+              title: '提示',
+              message: res.data.msg,
+              duration: 1500
+            });
+          }
+        })
+      },
+      changeHead(categories){
+        this.form.subcategories = ''
+        this.form.refuseReason =''
+        this.categories = categories
+        this.reasonSecond = []
+        this.reasonThree = []
+        if(!categories) return
+        api.ReviewRefuseReason({type:'2',categories:categories}).then(res => {
+          if(res.data.code ==1) {
+            this.reasonSecond = res.data.data
+          } else {
+            this.$notify({
+              title: '提示',
+              message: res.data.msg,
+              duration: 1500
+            });
+          }
+        })
+      },
+      changeInfo(subcategories){
+        this.form.refuseReason =''
+        this.reasonThree = []
+        if(!subcategories) return
+        api.ReviewRefuseReason({type:'3',categories:this.categories,subcategories:subcategories.code}).then(res => {
+          if(res.data.code ==1) {
+            this.reasonThree = res.data.data
+          } else {
+            this.$notify({
+              title: '提示',
+              message: res.data.msg,
+              duration: 1500
+            });
+          }
+        })
+      },
+      confirm_follow(form){ //  拒单
+        console.log(56,this.form.refuseReason);
         this.$refs['form'].validate((valid) => {
           if(valid){
             this.saveFollow = true
             api.queryRefuseOrder({
               crmApplayId:this.multipleSelectionIdList,//申请单id(拒单/复活 必填)拒单多个以','隔开
+              orderStatus:this.orderStatus,// 订单编号
               remark:this.form.remark, // 备注
-              rejectReasonNumber:this.form.rejectReasonNumber,//处理编号
-              rejectReason: this.form.rejectReason,//处理原因
+              selNumber:this.form.refuseReason.code,//三级编号
+              selReaseon: this.form.subcategories.value,//二级原因
             }).then((res) => {
               this.saveFollow = false
+              this.$refs['form'].resetFields();
               this.dialogFollow.dialogFollowVisible=false
               this.queryApplyOrderInfoFn()
               this.$notify({
@@ -185,6 +274,7 @@
                 duration: 1500
               });
             })
+
           }else{
             return false
           }
@@ -206,7 +296,7 @@
           pageNo: this.pageNo,
           pageSize: this.pageSize,
           queryParam: this.serachPararms.content,
-          orderStatus: this.serachPararms.orderStatus,//订单状态：1申请中,2审批中,3还款中,4已结清,5拒绝,6线上筹资中,7满标,8满标以放款,9流标,10退件
+          orderStatus: this.serachPararms.orderStatus ||'1,2,6,7,8,9',//订单状态：总控审批中订单默认只展示 审批中和申请中的    1申请中,2审批中,3还款中,4已结清,5拒绝,6线上筹资中,7满标,8满标以放款,9流标,10退件
 //			custStatus: [1,2],//客户状态:1未实名,2已实名,3已成交[1,2]
           applyTimeBegin: s_time,
           applyTimeEnd: e_time,
@@ -220,10 +310,14 @@
           cityId: this.serachPararms.applyCity,
           remainTimeBegin:this.serachPararms.remainTimeBegin,
           remainTimeEnd:this.serachPararms.remainTimeEnd,
+          currentModuleId: this.$route.query.menuId,
         }
         console.log(this.serachPararms,6666)
         console.log(pararms,6666)
+       
         api.queryAllControlOrder(pararms).then(res => {
+           this.total = 0
+            this.tableData =[]
           console.log(898,res);
           this.loadingTable = false
           if(res.data.success) {
@@ -258,51 +352,90 @@
 //
 //		})
       },
-      modifyReject(row){ // todo 拒单
+      modifyReject(row){
+        this.$nextTick(()=>{
+          if(this.$refs.form){
+            this.$refs.form.resetFields();
+          }
+        })
+        this.reviewRefuseReason()
+        console.log(8989,row);
+        this.orderNo=true // 订单编号显示
         this.dialogFollow.dialogFollowVisible=true
         this.multipleSelectionIdList = row.crmApplayId
+        this.orderStatus = row.orderStatus
         this.orderNumber  = row.orderNumber // 订单编号
-        this.form= {
+        this.form = Object.assign({},{
           crmApplayId: '',
-            remark: '',
-            rejectReasonNumber: '',
-            rejectReason: ''
-        }
+          orderStatus:'',
+          remark: '',
+          refuseCode: '',
+          refuseReason: ''
+        })
       },
       searchFn(data) {
         this.pageNo = 1
         this.currentPage = 1
         this.serachPararms = Object.assign(this.serachPararms,data)
+        
         if(!this.serachPararms.orderStatus){
           this.serachPararms.orderStatus = ''
         }
         this.queryApplyOrderInfoFn()
       },
-      rejectFn(){ // todo 拒单
+      rejectFn(){
         if ( !this.$store.state.controlArr || this.$store.state.controlArr.length <= 0) {
           this.$message.warning('请选择要拒绝的订单')
           return false
         }
+
         const arr  = []
+        const statusArr =[]
         const arrOrderNumber  = []
         this.$store.state.controlArr.forEach((value, index)=>{
           arr.push(value.crmApplayId)
+          statusArr.push(value.orderStatus)
           arrOrderNumber.push(value.orderNumber)
         })
+        // if (statusArr.indexOf('1') !== -1 && (statusArr.indexOf('2') !== -1 ||statusArr.indexOf('6') !== -1|| statusArr.indexOf('7') !== -1||statusArr.indexOf('8') !== -1||statusArr.indexOf('9') !== -1)){
+        //   this.$message.warning('请选择同一类订单状态')
+        //   return false
+        // }
+
+        // 如选择多个订单拒绝，则订单编号不展示
         this.multipleSelectionIdList = arr.join(',')
-        this.orderNumber = arrOrderNumber.join(',')
-        this.dialogFollow.dialogFollowVisible=true
-        this.form= {
-          crmApplayId: '',
-          remark: '',
-          rejectReasonNumber: '',
-          rejectReason: ''
+        this.orderStatus = statusArr.join(',')
+        if(arrOrderNumber.length==1){
+          this.orderNo = true
+          this.orderNumber = arrOrderNumber[0]
+        }else if(arrOrderNumber.length >=2){
+          this.orderNo = false
+          this.orderNumber=''
         }
+        this.$nextTick(()=>{
+          if(this.$refs.form){
+            this.$refs.form.resetFields();
+          }
+        })
+        this.reviewRefuseReason()
+        // this.orderNumber = arrOrderNumber.join(',')
+        this.dialogFollow.dialogFollowVisible=true
+        this.form = Object.assign({},{
+          crmApplayId: '',
+          orderStatus:'',
+          remark: '',
+          refuseCode: '',
+          refuseReason: ''
+        })
+
       },
       handleSizeChange(val) {
-        let myPageSize = JSON.parse(localStorage.getItem('myPageSize'))
-        myPageSize.C_ControlList = val
-        localStorage.setItem('myPageSize',JSON.stringify(myPageSize))
+        this.pageNo = 1
+        this.currentPage = 1
+        pageSize.setMyPageSize(val)
+        // let myPageSize = JSON.parse(localStorage.getItem('myPageSize'))
+        // myPageSize.C_ControlList = val
+        // localStorage.setItem('myPageSize',JSON.stringify(myPageSize))
         this.pageSize = val
         this.queryApplyOrderInfoFn()
       },
@@ -390,8 +523,17 @@
         return flag;
       },
     },
+    watch: {
+    	"dialogFollow.dialogFollowVisible"(val) {
+    		console.log(val)
+    		if (!val) {
+    			this.reasonSecond = []
+        	this.reasonThree = []
+    		}
+    	}
+    },
     components: {
-      TitCommon,
+//    TitCommon,
       TableList,
       Search,
       Pagination
@@ -399,36 +541,46 @@
 
   }
 </script>
-<style lang="less">
+<style lang="less" scoped>
   .allCustList {
     .line-limit-length {
-      margin-left:10px;
+
       display: inline-block;
-      width: 300px;
+      width: 368px;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
     }
-    .table-wrap {
-      padding-top: 20px;
-      .el-table th {
-        padding: 9px 0;
-      }
-      .el-table td{
-        padding: 3px 0;
-      }
-    }
+
     .rejectInfo{
       .proviceCity {
-        /*display: block;*/
         width: 100px;
+        float:left;
       }
+      .applyCity{
+        width: 120px;
+        float:left;
+        margin:0 5px;
+      }
+      .applyArea{
+        width: 140px;
+        float:left;
+      }
+    }
+    .formNum {
+       height:40px;
+       padding-left:10px!important;
+
     }
     .textPro {
       .el-textarea{
-        width:308px;
-        float:right;
+        width:373px;
+        float:left;
       }
+
+    }
+    .el-form-item__error{
+      left:90px;
     }
   }
 </style>

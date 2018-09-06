@@ -3,8 +3,8 @@
  	<div class="order-search borBot1px">
 		<el-form :inline="true" :model="search" class="demo-form-inline">
 		  <el-form-item>
-		  	<div style="width:300px">
-		  		<el-input v-model="search.content" placeholder='请输入姓名、手机号或身份证号码精确查询' clearable></el-input>
+		  	<div style="width:320px">
+		  		<el-input v-model.trim="search.content" placeholder='请输入姓名、手机号或身份证号码精确查询' clearable></el-input>
 		  	</div>
 		  </el-form-item>
 		  <el-form-item  v-if='permission.showAllPararms'>
@@ -25,14 +25,14 @@
 		   	 <el-button @click='showSeniorSearch'>展开高级搜索</el-button>
 		  </el-form-item>
       <el-form-item v-if="permission.showReject">
-        <el-button  type="primary" @click='rejectFn'>拒绝</el-button>
+        <el-button type="danger" @click='rejectFn' :disabled="isRefuse">拒绝</el-button>
       </el-form-item>
 			<div class="seniorSearch" v-show='orShow'>
 				<div class="pad20">
 					<div class="custDistribution">
-						<span class="hideSeniorSearch" @click="hideSeniorSearch">收起 </span>
+						<span class="hideSeniorSearch" @click="hideSeniorSearch">收起并清空 </span>
 						<el-form-item label="产品系列" label-width='105px' >
-						    <el-select v-model="search.productList" placeholder="请选择" @change='changeProductList'>
+						    <el-select v-model="search.productList" placeholder="请选择" @change='changeProductList' clearable >
 						    	<el-option
 
 						    		v-for = 'item in productList'
@@ -41,13 +41,13 @@
 						    </el-select>
 						</el-form-item>
 						<el-form-item label="产品名称" label-width='105px'>
-						    <el-select v-model="search.productName" placeholder="请选择">
+						    <el-select v-model="search.productName" placeholder="请选择" clearable>
 						    	<el-option v-for = 'item in productList_s'
 						    		:label='item.name' :value="item.id" :key='item.id'></el-option>
 						    </el-select>
 						</el-form-item>
 						<el-form-item label="订单状态" label-width='105px' v-if='permission.showOrderState'>
-						    <el-select v-model="search.orderStatus" placeholder="请选择" @change='changeOrderState'>
+						    <el-select v-model="search.orderStatus" placeholder="请选择" @change='changeOrderState' clearable>
 						    	<!--<el-option v-for = '(val,ind) in productState' :label='val' :value="ind" :key='ind'></el-option>-->
                   <el-option v-for = 'item in productState'
                              :label='item.name' :value="item.id" :key='item.id'></el-option>
@@ -71,8 +71,8 @@
 							<el-input :maxlength='20' style="width: 200px;" v-model="search.people" placeholder='请输入姓名模糊查询' ></el-input>
 						</el-form-item>
 						<el-form-item label="订单环节" label-width='105px' v-if='permission.showOrderNode' >
-						    <el-select v-model="search.orderNode" placeholder="请选择" @change='f1' :disabled = 'showOrderNodeChild'>
-						    	<el-option v-for = '(val,ind) in orderNode' :label='val' :value="ind" :key='ind'></el-option>
+						    <el-select v-model="search.orderNode" placeholder="请选择" @change='f1' :disabled = 'showOrderNodeChild' clearable>
+						    	<el-option v-for = 'val in orderNode'   :key="val.id" :label="val.name" :value="val.detailCode"></el-option>
 						    </el-select>
 						</el-form-item>
 					</div>
@@ -104,7 +104,7 @@
 
 					</div>
           <div v-if="permission.ShowRemainTime">
-            <el-form-item label="当前环节停留时间（h）" label-width='160px' class="ShowRemainTime">
+            <el-form-item label="当前环节停留时间（h）" label-width='170px' class="ShowRemainTime">
               <el-input  v-model="search.remainTimeBegin" @input='checkDateMin' @blur="checkChange"></el-input> -
               <el-input  v-model="search.remainTimeEnd" @input='checkDateMax' @blur="checkChange"></el-input>
             </el-form-item>
@@ -172,6 +172,7 @@ export default {
   	},
 	data() {
 	  	return {
+
         partName_s:'',
 	  		number_s: 5,
 	  		showOrderNodeChild: false,
@@ -205,21 +206,56 @@ export default {
 	        // productState: ['申请中','审批中','还款中','已结清','拒单'],
 	        orderNode: [],
 	        //订单状态的'申请中'对应的订单环节
-	        orderNode_s1: ['身份证上传','肖像认证','手持身份证','完善信息','基本信息','工作信息','联系人信息','手机认证','产品选择/材料授权'],
-        // orderNode_s1:[{name:"身份证上传",id:"1"},{name:"肖像认证",id:"2"},{name:"手持身份证",id:"4"},{name:"完善信息",id:"5"},{name:"基本信息",id:"6"},
-    // {name:"工作信息",id:"7"},{name:"联系人信息",id:"8"},{name:"手机认证",id:"9"},{name:"产品选择/材料授权",id:"10"}],
-	        //订单状态的'审批'对应的订单环节
-	        orderNode_s2: ['信息审核','电话审核','视频面签','终审','合规检查','开立账户','上线筹资','放款成功'],
-	        // orderNode_s2: [{name:"信息审核",id:"1"},{name:"电话审核",id:"2"},{name:"视频面签",id:"4"},{name:"终审",id:"5"},{name:"合规检查",id:"6"},
-            // {name:"开立账户",id:"7"},{name:"上线筹资",id:"8"},{name:"放款成功",id:"9"}],
+	        orderNode_s1: [],
+	        orderNode_s2: [],
         multipleSelectionIdList:''
 	  	}
 	},
+  computed:{
+    isRefuse(){
+      return this.$store.state.isRefuse;
+    }
+  },
 	mounted() {
 		this.queryProvinceFn()
 		this.queryCrmProTypeInfoFn()
+    this.queryDictionary()
+    this.queryDictionary2()
 	},
     methods: {
+    	
+      queryDictionary(){ //  订单节点状态 审批中
+        api.queryAllDetailOrder({code:'000002',status:1}).then(res=>{
+          console.log(111,res)
+          if(res.data.success){
+            for (var i=0; i < res.data.data.length;i++) {
+              this.orderNode_s2.push(res.data.data[i])
+            }
+          } else {
+            this.$notify({
+              title: '提示',
+              message: res.data.msg,
+              duration: 1500
+            });
+          }
+        })
+      },
+      queryDictionary2(){ // 订单节点状态 申请中
+        api.queryAllDetailOrder({code:'000001',status:1}).then(res=>{
+          console.log(111,res)
+          if(res.data.success){
+            for (var i=0; i < res.data.data.length;i++) {
+              this.orderNode_s1.push(res.data.data[i])
+            }
+          } else {
+            this.$notify({
+              title: '提示',
+              message: res.data.msg,
+              duration: 1500
+            });
+          }
+        })
+      },
       replceNumVal(keys,value) {
         this.$nextTick(()=>{    	//^[0-9]*$
           this.search[keys] = value.replace(/[^0-9$]/g,'')
@@ -243,10 +279,10 @@ export default {
     	changeOrderState(val) {//订单状态条件改变时
         this.search.orderNode = ''
     		if (this.permission.showOrderState && this.permission.showOrderNode) {//订单状态与订单环节联动时
-    			if (val==1) {
+    			if (val=='1') {
 	    			this.orderNode = this.orderNode_s1
 	    			this.showOrderNodeChild = false
-	    		} else if (val == 2) {
+	    		} else if (val == '2,6,7,8,9') {
 	    			this.orderNode = this.orderNode_s2
 	    			this.showOrderNodeChild = false
 	    		} else {
@@ -282,12 +318,17 @@ export default {
     		})
 
     	},
+    	
     	changeProductList() {
     		this.search.productName = ''
+    		this.productList_s = []
+    		if (!this.search.productList) {
+    			return
+    		}
     		api.queryCrmProInfo({status: 1,cptId: this.search.productList}).then(res => {
     			if(res.data.success){
     				this.productList_s = res.data.data
-    				console.log(this.productList_s,123133)
+//  				console.log(this.productList_s,123133)
     			} else {
     				this.productList_s = []
     				this.$notify({
@@ -298,6 +339,11 @@ export default {
     			}
     		})
 //  		console.log(this.search.productList)
+    	},
+    	clearProductName() {
+    		this.search.productName = ''
+    		this.productList_s = []
+    		console.log(this.productList_s,"====")
     	},
     	changeProvince(id){//省，改变时
     		this.search.applyCity = ''
@@ -422,21 +468,7 @@ export default {
 	   	showSeniorSearch() {
 	   		this.showTree = false
 	   		this.orShow = !this.orShow
-	   		if(this.orShow) {//清空数据
-	  			let clearObj = {
-		  			productList: '',//产品系列
-		  			productName: '',//产品名称
-		  			orderState: '',//订单状态
-		  			orderNode: '',//订单环节
-		  			partName: '',
-            partName_s:'',
-		  			people: '',
-		  			applyProvince: '',
-		  			applyCity: '',
-		  			applyDate: []
-	  			}
-	  			Object.assign(this.search,clearObj)
-	  		}
+
 	   	},
 	   	clearFn() {
 	   		this.search.partName = ''
@@ -445,17 +477,65 @@ export default {
 	   	hideSeniorSearch(){
 	   		this.orShow = false
 	   		this.showTree = false
+	   		//清空数据
+	  		let clearObj = {
+	  			productList: '',//产品系列
+	  			productName: '',//产品名称
+	  			orderState: '',//订单状态
+	  			orderStatus: '',
+	  			orderNode: '',//订单环节
+	  			partName: '',
+        		partName_s:'',
+	  			people: '',
+	  			applyProvince: '',
+	  			applyCity: '',
+	  			applyDate: [],
+	  			hangStatus: false,
+	  			remainTimeBegin: '',
+	  			remainTimeEnd: ''
+  			}
+	  		this.partName_s = ''
+//			Object.assign(this.search,clearObj)
+  			this.search = Object.assign(this.search,clearObj)
 	   	},
 	   	searchFn() {
-        if(this.search.remainTimeBegin && this.search.remainTimeEnd){
+
+        
+
+        
+        var flag = this.checkRemainTime()
+        if (!flag) {
+        	return
+        }
+        this.orShow = false
+        this.$emit('searchFn',this.search)
+      },
+      checkRemainTime(){
+      	if(this.search.remainTimeBegin && this.search.remainTimeEnd){
+      		console.log(this.search.remainTimeBegin,this.search.remainTimeEnd,"this.remainTimeBegin")
           if(this.search.remainTimeBegin>this.search.remainTimeEnd){
             this.$message.warning("结束时间必须大于等于开始时间")
             return false
+          } else {
+          	return true
           }
         }
-        this.$emit('searchFn',this.search)
-      },
+    		if (this.search.remainTimeBegin || this.search.remainTimeEnd) {
+    			if (!this.search.remainTimeBegin) {
+	    			console.log(this.search.remainTimeBegin,"this.remainTimeBegin")	    		
+	          this.$message.warning("请输入当前环节停留的开始时间")
+	          return false
+	    		}
+	    		if (!this.search.remainTimeEnd) {	    
+	          this.$message.warning("请输入当前环节停留的结束时间")
+	          return false
+	    		}
+    		}  else {
+    			return true
+    		}
+    	},
       rejectFn(){
+
         this.$emit('rejectFn',this.search)
       },
     },
@@ -469,13 +549,16 @@ export default {
 </script>
 <style scoped lang="less">
 	.order-search {
-		margin-top: 20px;
+		margin-top: 8px;
 		position: relative;
-    .ShowRemainTime {
-      .el-input{
-        width:150px;
-      }
-    }
+		.el-button {
+			border-radius: 0;
+		}
+	    .ShowRemainTime {
+	      .el-input{
+	        width:150px;
+	      }
+	    }
 		.seniorSearch {
 			position: absolute;
 			width: 100%;

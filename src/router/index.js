@@ -2,9 +2,9 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import routes from './routes.js'
 Vue.use(Router)
-
+console.log(window.location.href)
 const router = new Router({    
-    routes: routes
+  routes: routes,
 })
 router.afterEach((to, from, next) => {
     document.title = to.name || to.meta.name;

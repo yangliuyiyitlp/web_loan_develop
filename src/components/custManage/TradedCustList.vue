@@ -1,6 +1,6 @@
 <template>
  <div class="allCustList">
- 	<TitCommon :title='title'></TitCommon>
+ 	<!--<TitCommon :title='title'></TitCommon>-->
  	<div class="custListWrap">
  		<search
  			:treeData = 'treeData'
@@ -41,14 +41,16 @@
 
 <script>
 import api from "@/api/index"
-import TitCommon from '@/components/common/TitCommon'
+import pageSize from "@/api/myPageSize"
+
+//import TitCommon from '@/components/common/TitCommon'
 import Pagination from '@/components/common/Pagination'
 import Search from '@/components/custManage/Search'
 import TableList from '@/components/custManage/TableList'
 import DialogOrderList from '@/components/custManage/dialog/DialogOrderList'
 import DialogFollow from '@/components/custManage/dialog/DialogFollow'
 export default {
-  name: 'allList',
+  name: 'U_TradedCustList',
   data() {
   	return {
   		title: '已成交客户',
@@ -74,13 +76,16 @@ export default {
   },
 
  created() {
- 	if (JSON.parse(localStorage.getItem('myPageSize'))) {
- 		this.pageSize = JSON.parse(localStorage.getItem('myPageSize')).W_TradedList?JSON.parse(localStorage.getItem('myPageSize')).W_TradedList:10
- 		console.log(JSON.parse(localStorage.getItem('myPageSize')).W_TradedList)
- 	} else {
- 		let obj = {}
- 		localStorage.setItem('myPageSize',JSON.stringify(obj))
- 	}
+   if( pageSize.getMyPageSize(this.pageSize)){
+     this.pageSize=pageSize.getMyPageSize(this.pageSize)
+   }
+ 	// if (JSON.parse(localStorage.getItem('myPageSize'))) {
+ 	// 	this.pageSize = JSON.parse(localStorage.getItem('myPageSize')).W_TradedList?JSON.parse(localStorage.getItem('myPageSize')).W_TradedList:10
+ 	// 	console.log(JSON.parse(localStorage.getItem('myPageSize')).W_TradedList)
+ 	// } else {
+ 	// 	let obj = {}
+ 	// 	localStorage.setItem('myPageSize',JSON.stringify(obj))
+ 	// }
  },
  computed: {
  	permission () {
@@ -99,7 +104,7 @@ export default {
   methods: {
   	queryCustInfoData() {
   		this.loadingTable = true
-  		this.tableData = []
+		
   		const pararms = {
   			currentModuleId: this.$route.query.menuId,
   			pageNo: this.pageNo,
@@ -116,6 +121,8 @@ export default {
   		}
   		console.log(pararms)
   		api.queryCustInfoData(pararms).then(res => {
+			    this.tableData = []
+		  this.total =0
   			this.loadingTable = false
 			if(res.data.success) {
 				this.total = res.data.total
@@ -166,6 +173,8 @@ export default {
 //		console.log(this.multipleSelectionIdList,66666)
   	},
   	searchFn(data) {
+      this.pageNo=1
+      this.currentPage=1
   		this.serachPararms = Object.assign(this.serachPararms,data)
 //		let arrCheckList = this.serachPararms.checkList
 		if(!this.serachPararms.checkListParams){
@@ -192,17 +201,21 @@ export default {
   		console.log(row)
   	},
   	handleSizeChange(val) {
-		this.currentPage = 1
-		let myPageSize = JSON.parse(localStorage.getItem('myPageSize'))
-  		myPageSize.W_TradedList = val
-	 	localStorage.setItem('myPageSize',JSON.stringify(myPageSize))
-		this.pageNo = 1
+      pageSize.setMyPageSize(val)
+		// this.currentPage = 1
+		// let myPageSize = JSON.parse(localStorage.getItem('myPageSize'))
+  		// myPageSize.W_TradedList = val
+	 	// localStorage.setItem('myPageSize',JSON.stringify(myPageSize))
+		// this.pageNo = 1
 		this.pageSize = val
+      this.currentPage = 1
+      this.pageNo = 1
 		this.queryCustInfoData()
 //		console.log(val,777777777777)
 	},
 	handleCurrentChange(val) {
 		this.pageNo = val
+    this.currentPage = val
 		this.queryCustInfoData()
 //		console.log(val,88888888)
 	},
@@ -348,19 +361,19 @@ export default {
 
   },
   components: {
-  	TitCommon,
+//	TitCommon,
   	Search,
   	TableList,
   	Pagination,
   	DialogOrderList,
   	DialogFollow,
-  	DialogFollow
+
   }
 
  }
 </script>
-<style lang="less">
-	.allCustList {
+<style lang="less" scoped>
+	/*.allCustList {
 		.table-wrap {
 			padding-top: 20px;
 			.el-table th {
@@ -371,5 +384,5 @@ export default {
 			}
 		}
 
-	}
+	}*/
 </style>

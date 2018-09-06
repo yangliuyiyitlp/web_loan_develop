@@ -1,6 +1,6 @@
 <template>
  <div class="paramSet-wrap">
- 	<tit-common :title='title'></tit-common>
+ 	<!--<tit-common :title='title'></tit-common>-->
  	<div class="paramSet-con">
  		<el-form 
  			:rules="rules"
@@ -75,11 +75,11 @@
 	 			<div class="width-com clearfix">	 			
 	 			    <el-form-item label="订单有效期" prop="orderExpiry">
 					    <el-input :maxlength='6' v-model="pararmsData.orderExpiry" @input='checkOrderExpiry'></el-input>天
-					    <div style="margin-top: 15px;">				    	
+					    
+				    </el-form-item>
+				    <div class='updateBtn'>				    	
 					    	<el-button class='rt' type="primary"  @click='updateParms' :loading = 'orSave'>保存更新</el-button>
 					    </div>
-				    </el-form-item>
-				    
 	 			</div>	 					
 	 		</el-row>
  		</el-form>
@@ -88,10 +88,10 @@
 </template>
 
 <script>
-import TitCommon from '@/components/common/TitCommon'
+//import TitCommon from '@/components/common/TitCommon'
 import api from "@/api/index"
 export default {
-    name: 'paramSet',
+    name: 'SYP_ParamSet',
     data() {
     	var realNameUpgradeCheck = (rule, value, callback) => {    		
         	 if(Number(value) <= 0) {
@@ -293,7 +293,7 @@ export default {
     	}
     },
     components: {
-	  	TitCommon	
+//	  	TitCommon	
 	}
 
  }
@@ -302,6 +302,9 @@ export default {
 	.paramSet-wrap {
 		.paramSet-con {
 			padding-top: 20px;
+			.updateBtn{
+              margin: 20px 100px 0 0;
+			}
 			.tit-con {
 				color: #000;
 			    font-size: 16px;

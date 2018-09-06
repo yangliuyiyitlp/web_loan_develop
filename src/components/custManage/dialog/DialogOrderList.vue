@@ -11,6 +11,7 @@
 			  	<pagination
 					:currentPage = 'currentPage'
 					:total = 'total'
+          :layout='layout'
 					@handleSizeChange = 'handleSizeChange'
 					@handleCurrentChange = 'handleCurrentChange'
 	 				>
@@ -66,6 +67,7 @@
 	  },
 	  data () {
 	    return {
+        layout:"total, prev, pager, next, jumper",
 	    	currentPage:1,
 	  		total: 0,
 	  		pageNo: 1,
@@ -107,6 +109,7 @@
 				})
     	},
 	  	queryOrderList(crmCustInfoId){
+			
         console.log(888888,crmCustInfoId);
         this.crmCustInfoId = crmCustInfoId
 	  			api.queryOrderList({
@@ -115,6 +118,8 @@
 //	  				crmCustInfo:crmCustInfoId,
 						crmCustInfo:crmCustInfoId,
 	  			}).then((res) =>{
+							this.gridData = []
+						this.total = 0
 					if (res.data.code==1) {
             console.log(3333,res.data.data);
             this.gridData = res.data.data
@@ -139,6 +144,7 @@
 			},
 			handleCurrentChange(val) {
 				this.pageNo = val
+        this.currentPage = val
 				this.queryOrderList(this.crmCustInfoId)
 //				console.log(val,88888888)
 			},

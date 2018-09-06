@@ -1,47 +1,49 @@
 <template>
  <div class="allCustList">
- 	<TitCommon :title='title'></TitCommon>
+ 	<!--<TitCommon :title='title'></TitCommon>-->
  	<div class="custListWrap">
- 		<search  
+ 		<search
  			ref='search'
  			:treeData = 'treeData'
- 			:data = 'zTreeData' 
- 			@CustDistributionFn='CustDistributionFn' 
- 			@searchFn='searchFn' 
- 			:permission ='permission'> 			
+ 			:data = 'zTreeData'
+ 			@CustDistributionFn='CustDistributionFn'
+ 			@searchFn='searchFn'
+ 			:permission ='permission'>
  		</search>
  		<div class="table-wrap">
- 			<table-list 
+ 			<table-list
  				:tablePermisson = 'tablePermisson'
  				:loadingTable = 'loadingTable'
- 				:tableData='tableData' 
+ 				:tableData='tableData'
  				@showDialogTableVisible = 'showDialogTableVisible'
  				@showOrderDetail = 'showOrderDetail'
- 				> 				
- 			</table-list> 			
+ 				>
+ 			</table-list>
  		</div>
  		<div class="pad20 alignCen">
- 			<pagination 				
+ 			<pagination
 				:currentPage = 'currentPage'
 				:total = 'total'
 				:myPageSizes = 'pageSize'
 				@handleSizeChange = 'handleSizeChange'
 				@handleCurrentChange = 'handleCurrentChange'
- 				> 				
+ 				>
  			</pagination>
- 		</div> 		
+ 		</div>
  	</div>
  </div>
 </template>
 
 <script>
-import api from "@/api/index"	
-import TitCommon from '@/components/common/TitCommon'
+import api from "@/api/index"
+import pageSize from "@/api/myPageSize"
+
+//import TitCommon from '@/components/common/TitCommon'
 import Pagination from '@/components/common/Pagination'
-import TableList from '@/components/orderManage/TableList'
-import Search from '@/components/orderManage/OrderSearch'
+import TableList from '@/components/common/OrderAndCtrollTableList'
+import Search from '@/components/common/OrderAndCustomerSearch'
 export default {
-  name: 'allList',
+  name: 'O_RepayMentList',
   data() {
   	return {
   		tablePermisson: {
@@ -49,10 +51,10 @@ export default {
   			orderStatus: false, //订单状态
   			nodeName: false, //环节
   			hangTime: false, //挂起时间
-  			detailBtn: true
+  			detailBtn: true,
+			applyTime:true
   		},
   		title: '还款中订单管理',
-  		currentPage:1,
   		currentPage:1,
   		total: 0,
   		pageNo: 1,
@@ -70,7 +72,7 @@ export default {
         treeData: [],
         loadingTable: false,
 //      multipleSelectionIdList: '',
-        
+
   	}
  },
  computed: {
@@ -80,7 +82,8 @@ export default {
 			showOrderState: false, //是否要展示高级搜索的‘订单状态’的条件
 			showOrderNode: false, //是否要展示高级搜索的‘订单环节’的条件
 			onlyOrderNode: false, //true是申请中页面控制的订单环节，fasle是审批中页面控制的订单环节
-			showOnlyCheck: true
+			showOnlyCheck: true,
+			searchContent:'请输入姓名、手机号或身份证号码精确查询'
  		}
  	}
  },
@@ -90,16 +93,20 @@ export default {
 // 	this.$refs.search.checkOrderNodeFn()
  },
  created() {
- 	if (JSON.parse(localStorage.getItem('myPageSize'))) { 	
- 		this.pageSize = JSON.parse(localStorage.getItem('myPageSize')).W_RepaymentList?JSON.parse(localStorage.getItem('myPageSize')).W_RepaymentList:10
- 		console.log(JSON.parse(localStorage.getItem('myPageSize')).W_RepaymentList)
- 	} else {
- 		let obj = {}
- 		localStorage.setItem('myPageSize',JSON.stringify(obj))
- 	}
+   if( pageSize.getMyPageSize(this.pageSize)){
+     this.pageSize=pageSize.getMyPageSize(this.pageSize)
+   }
+ 	// if (JSON.parse(localStorage.getItem('myPageSize'))) {
+ 	// 	this.pageSize = JSON.parse(localStorage.getItem('myPageSize')).W_RepaymentList?JSON.parse(localStorage.getItem('myPageSize')).W_RepaymentList:10
+ 	// 	console.log(JSON.parse(localStorage.getItem('myPageSize')).W_RepaymentList)
+ 	// } else {
+ 	// 	let obj = {}
+ 	// 	localStorage.setItem('myPageSize',JSON.stringify(obj))
+ 	// }
  },
   methods: {
   	queryApplyOrderInfoFn() {
+		 
   		this.loadingTable = true
   		let s_time,e_time
   		if (this.serachPararms.applyDate) {
@@ -133,10 +140,12 @@ export default {
 //		console.log(this.serachPararms,6666)
 //		console.log(pararms,6666)
 		api.queryApplyOrderInfo(pararms).then(res => {
+			 	this.total =0
+				this.tableData =[]
 			this.loadingTable = false
 			if(res.data.success) {
 				this.total = res.data.total
-				this.tableData = res.data.data 
+				this.tableData = res.data.data
 			} else {
 				this.$notify({
 		           title: '提示',
@@ -148,10 +157,10 @@ export default {
 		})
   	},
   	showDialogTableVisible(row,orShow) {
-//		this.visibleObj.dialogTableVisible = orShow	  	
+//		this.visibleObj.dialogTableVisible = orShow
   		console.log(row,orShow)
   	},
-  	showOrderDetail(row,orShow) {  		
+  	showOrderDetail(row,orShow) {
 		var routeData = this.$router.resolve({
         	path: '/detail/orderDetail',
         	query: {
@@ -187,23 +196,26 @@ export default {
   	},
   	handleSizeChange(val) {
 		this.currentPage = 1
-		let myPageSize = JSON.parse(localStorage.getItem('myPageSize'))
-  		myPageSize.W_RepaymentList = val
-	 	localStorage.setItem('myPageSize',JSON.stringify(myPageSize))
-		this.pageSize = val  
+      this.pageNo = 1
+      pageSize.setMyPageSize(val)
+
+      // let myPageSize = JSON.parse(localStorage.getItem('myPageSize'))
+  		// myPageSize.W_RepaymentList = val
+	 	// localStorage.setItem('myPageSize',JSON.stringify(myPageSize))
+		this.pageSize = val
 		this.queryApplyOrderInfoFn()
 //		console.log(val,777777777777)
 	},
 	handleCurrentChange(val) {
-		this.pageNo = val	
+		this.pageNo = val
 		this.currentPage = val
-//		this.pageNo = val	
+//		this.pageNo = val
 		this.queryApplyOrderInfoFn()
 //		console.log(val,88888888)
 	},
 	getDepartmentZtreeFn() {
 		api.getDepartmentZtree({groupId:''}).then(res => {
-			if(res.data.status == 1) {		
+			if(res.data.status == 1) {
 				this.treeData = res.data.ztree
 				this.zTreeData = this.toTree(res.data.ztree)
 			} else {
@@ -223,7 +235,7 @@ export default {
 			var idList = [];
 			ary.forEach(function(item) {
 				idList.push(item.id)
-			});					
+			});
 			for(var i = 0, len = ary.length; i < len; i++) {
 				if(ary[i].pId == undefined || (ary[i].pId != undefined && _this.debFn(ary[i].pId, idList))) {
 					var obj = {
@@ -280,7 +292,7 @@ export default {
 	},
   },
   components: {
-  	TitCommon,
+//	TitCommon,
   	TableList,
 	Search,
 	Pagination,
@@ -288,20 +300,9 @@ export default {
 //	DialogFollow,
 //	DialogFollow
   }
-  
+
  }
 </script>
-<style lang="less">
-	.allCustList {		
-		.table-wrap {
-			padding-top: 20px;
-			.el-table th {
-				padding: 9px 0;
-			} 
-			.el-table td{
-				padding: 3px 0;
-			}
-		}
-		
-	}
+<style lang="less" scoped>
+
 </style>

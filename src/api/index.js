@@ -33,34 +33,37 @@ _axios.interceptors.request.use(
 
 _axios.interceptors.response.use(
     (response) => {
-//      var timer = new Date().getTime();
-//      if ((timer - localStorage.timer) > 600000) {
-//          _axios.get("/getNewAccessToken?accessToken=" + localStorage.token).then(function(response) {
-////                  console.log(response, 23);
-//                  localStorage.token = response.data.accessToken;
-//                  localStorage.timer = new Date().getTime()
-//              })
-//              .catch(function(error) {
-//                  console.log(error);
-//              });;
-//
-//      }
+ 	// console.log(response,"console.log(response.response)")
         return response;
-    }, (error) => {
+   }, (error) => {
+     console.log(error,10000)
+console.log(error.response,"console.log(error.response)")
         if (error.response) {
             switch (error.response.status) {
-                case 401:
-                    localStorage.clear();
-                    router.push({ path: '/home' });
-                    location.reload();
-                    break;
-                    /*      default :
-                         vm.$message({
-                           duration: 5000,
-                           type: 'warning',
-                           message: error.response.status + " " + error.response.statusText
-                       }) */
 
+//              case 404:
+//                  router.push({ path: '/404' });
+//                  break;
+//              case 500:
+//                  router.push({ path: '/500' });
+              	case 401:
+                    window.location.href = baseURL+'/sys/logout'
+//										window.location.reload()
+                    break;
+//              case 404:
+//                  router.push({ path: '/404' });
+//                  break;
+//              case 500:
+//                  router.push({ path: '/500' });
+//                  break;
+//              case 500:
+//                  router.push({ path: '/500' });
+//                  break;
+//            case 500:
+//              localStorage.clear();
+//              router.push({ path: '/500' });
+//              location.reload();
+//              break;
             }
 
         }
@@ -82,6 +85,8 @@ export default {
     // },
     upload: baseURL + '/api/upload/upload',
   fileUpLoad:baseURL + '/api/upload/fileUpload',
+   //退出
+   queryMyLogout:baseURL+'/sys/logout',
   // fileUpLoad: 'http://192.168.21.178:8080/microcredit/api/upload/fileUpload',
     queryQuestionList(data, params) {
     	return _axios.post("/api/question/queryQuestionList",queryString.stringify(data), { params: params });
@@ -100,16 +105,16 @@ export default {
     updateDictionary(data, params) { //新增，修改数据字典大类
         return _axios.post("/api/dictionary/updateDictionary",queryString.stringify(data), { params: params });
     },
-    queryPageDictionary(data, params) { //数据字典大类列表
+    queryPageDictionary(data, params) { //数据字典大类列表分页
         return _axios.post("/api/dictionary/queryPageDictionary",queryString.stringify(data), { params: params });
     },
-    queryPageDictionaryDetail(data, params) { //数据字典小类列表
+    queryPageDictionaryDetail(data, params) { //数据字典小类列表分页
         return _axios.post("/api/dictionaryDetail/queryPageDictionaryDetail",queryString.stringify(data), { params: params });
     },
   //数据字典明细
-  queryPageDictionaryDetail(data, params) {
-    return _axios.post("/api/app/appDictionaryDetail/queryPageDictionaryDetail",queryString.stringify(data), { params: params });
-  },
+  // queryPageDictionaryDetail(data, params) {
+  //   return _axios.post("/api/app/appDictionaryDetail/queryPageDictionaryDetail",queryString.stringify(data), { params: params });
+  // },
     updateDictionaryDetail(data, params) { //数据字典小类列表
         return _axios.post("/api/dictionaryDetail/updateDictionaryDetail",queryString.stringify(data), { params: params });
     },
@@ -143,7 +148,7 @@ export default {
     queryAbout(data, params) { //h5app关于
 
 //      return _axios.get("/api/app/appAbout/queryAppAboutUs",queryString.stringify(data), { params: params });
-		return _axios.get("/api/app/appAbout/queryAppAbout",queryString.stringify(data), { params: params });
+		return _axios.get("/web/appAbout/queryAppAbout",queryString.stringify(data), { params: params });
     },
     queryNodeListInfo(data, params) { //查询订单节点信息
         return _axios.post("/api/orderDetail/queryNodeListInfo",queryString.stringify(data), { params: params });
@@ -189,11 +194,11 @@ export default {
 
     //APP关于:默认值
     queryAppAbout(data, params) {
-    	return _axios.get("/api/app/appAbout/queryAppAbout",data, { params: params });
+    	return _axios.get("/web/appAbout/queryAppAbout",data, { params: params });
     },
     //APP关于：保存
     saveApp(data, params) {
-    	return _axios.post("/api/app/appAbout/updateAppAbout",queryString.stringify(data), { params: params });
+    	return _axios.post("/web/appAbout/updateAppAbout",queryString.stringify(data), { params: params });
     },
 
     etitorUpload(data, params) {
@@ -233,7 +238,7 @@ export default {
 queryCityByCityId(data, params) {
   return _axios.post("/api/address/queryDistrictByCityId",queryString.stringify(data), { params: params });
 },
-    //客户分配：根据组织ID获取业务员信息
+    //客户分配：获取业务员信息
     queryCustDistributionByDeptId(data, params) {
     	return _axios.post("/api/distribution/queryEmployeeByDeptId",queryString.stringify(data), { params: params });
     },
@@ -241,6 +246,10 @@ queryCityByCityId(data, params) {
 	cuntomerDistribution(data, params) {
     	return _axios.post("/api/distribution/customerDistribution",queryString.stringify(data), { params: params });
     },
+  //客户分配：变更业务归属人
+  cuntomerChangeSalesman(data, params) {
+    return _axios.post("/api/distribution/changeSalesman",queryString.stringify(data), { params: params });
+  },
 	//全部订单:查询全部订单列表
     queryApplyOrderInfo(data, params) {
     	return _axios.post("/api/allOrder/queryApplyInfo",queryString.stringify(data), { params: params });
@@ -317,6 +326,10 @@ queryCityByCityId(data, params) {
   permissionBtnPower(data, params) {
     return _axios.post("/auth/operate/list",queryString.stringify(data), { params: params });
   },
+  //登录姓名
+  queryLoginName(data, params) {
+    return _axios.post("/api/allOrder/loginedIn",queryString.stringify(data), { params: params });
+  },
   	//总控管理-全部订单-复活
 
 	reviveOrderFn(data, params) {
@@ -331,9 +344,53 @@ queryCityByCityId(data, params) {
   queryRefuseOrder(data, params) {
     return _axios.post("/api/allOrder/refuseOrder",queryString.stringify(data), { params: params });
   },
-  //退出
-  queryMyLogout(data, params) {
-    return _axios.get("/mylogout",queryString.stringify(data));
-  },
 
+//客服中心列表
+  queryCustomerService(data, params) {
+    return _axios.post("/api/customerManage/queryHangOrderPool",queryString.stringify(data), { params: params });
+  },
+  CustomerAccountOpenRecord(data, params) { //客服中心 开户记录
+    return _axios.post("/api/customerManage/accountOpenRecord",queryString.stringify(data), { params: params });
+  },
+  updateCustomerStatus(data, params) { //在线离线
+    return _axios.post("/api/customerManage/updateCustomerStatus",queryString.stringify(data), { params: params });
+  },
+  queryNodeFollow(data, params) { //客服中心获取跟进环节
+    return _axios.post("/api/followUp/queryNodeFollow",queryString.stringify(data), { params: params });
+  },
+  queryFollowInfo(data, params) {//查询跟进内容
+  	return _axios.post("/api/followUp/queryFollowInfo",queryString.stringify(data), { params: params });
+  },
+  ReviewRefuseReason(data, params) {//调用审批系统 拒单三级原因
+    return _axios.post("/api/review/reviewRefuseReason",queryString.stringify(data), { params: params });
+  },
+  queryRecordList(data, params) {//查询呼叫记录
+    return _axios.post("/api/orderCall/queryRecordList",queryString.stringify(data), { params: params });
+  },
+  queryRecordPath(data, params) {//查询录音
+    return _axios.post("/api/orderCall/queryRecordPath",queryString.stringify(data), { params: params });
+  },
+  validateTask(data, params) {//客服 验证是否绑定固话
+    return _axios.post("/api/orderCall/validateTask",queryString.stringify(data), { params: params });
+  },
+  callFixedTel(data, params) {//客服 验证是否绑定固话
+    return _axios.post("/api/orderCall/callFixedTel",queryString.stringify(data), { params: params });
+  },
+  getCollectors(data, params) {//催收机构
+    return _axios.post("/api/loanafter/getCollectors",queryString.stringify(data), { params: params });
+  },
+  otherQueryFollowList(data, params) {//穿山甲跟进列表
+    return _axios.post("/web/followUp/queryFollowList",queryString.stringify(data), { params: params });
+  },
+  otherQueryFollowInfo(data, params) {//穿山甲查看跟进内容
+    return _axios.post("/web/followUp/queryFollowInfo",queryString.stringify(data), { params: params });
+  },
+  // /
+  queryAddressInfoFn(data, params) {//
+    return _axios.post("/api/followUp/queryAddressInfo",queryString.stringify(data), { params: params });
+  },
+  
+  
 }
+
+

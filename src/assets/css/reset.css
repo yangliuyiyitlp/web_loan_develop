@@ -6,7 +6,11 @@ pre,
 fieldset,button, input, textarea,th, td { 
     margin: 0;
     padding: 0;
-    font-family: "微软雅黑";
+    /*font-family: "微软雅黑";*/
+    font-family:"Microsoft YaHei" !important;
+}
+a, abbr, acronym, address, applet, article, aside, audio, b, big, blockquote, body, canvas, caption, center, cite, code, dd, del, details, dfn, div, dl, dt, em, embed, fieldset, figcaption, figure, footer, form, h1, h2, h3, h4, h5, h6, header, html, i, iframe, img, input, ins, kbd, label, legend, li, mark, menu, nav, object, ol, output, p, pre, q, ruby, s, samp, section, small, span, strike, strong, sub, summary, sup, table, tbody, td, tfoot, th, thead, time, tr, tt, u, ul, var, video{
+	font-family:"Microsoft YaHei" !important;
 }
 *{ margin:0; padding:0;}
 textarea{ resize:none;}
@@ -64,11 +68,7 @@ i{ font-style:normal;}
 h1,h2,h3{ font-weight:normal;}
 
 .noc,.noc a{
--webkit-user-select: none; /* Chrome all / Safari all */
--moz-user-select: none; /* Firefox all */
--ms-user-select: none; /* IE 10+ */ /* No support for these yet, use at own risk */
--o-user-select: none;
-user-select: none;
+
 }
 
 .col3{ width: 33.33%; float: left;}
@@ -86,3 +86,6 @@ user-select: none;
 a {
 	color: #000;
 }
+button.el-button{
+  	    border-radius: 0;
+  }
