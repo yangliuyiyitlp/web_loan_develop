@@ -550,7 +550,7 @@
             {required:true, message: '请填写跟进内容', trigger: 'blur' }
           ],
           callerid:[
-            {required:true, message: '请输入话机ID', trigger: 'change' }
+            {required:true, message: '请输入话机ID', trigger: 'blur' }
           ]
         },
         arrData: [],
@@ -616,9 +616,10 @@
         this.$refs['callForm'].resetFields();
       },
       confirm_call(){ // 确认呼叫
-      this.saveFollow = true
+      
         this.$refs['callForm'].validate((valid) => {
           if (valid) {
+            this.saveFollow = true
             let params={
               crmApplayId:this.crmApplayId,
               fixeNumber:this.fixeNumber,   //固定id  旧

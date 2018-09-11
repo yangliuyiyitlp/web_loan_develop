@@ -108,7 +108,7 @@
 				    <el-form-item label="联系电话" :label-width="formLabelWidth" class='inline_from' >
 					    <el-input v-model="ruleForm.addFollowPhone" :maxlength = '11' class='callInput' disabled></el-input>
                <!-- <el-button type='text' :disabled='mobileCall ==""?true:false' v-loading='callPhoLoading' class='callBtn'> <i class="el-icon-phone-outline" @click="callPho" ></i></el-button>  -->
-               <button :disabled='mobileCall ==""?true:false' v-loading='callPhoLoading' class='callBtn el-icon-phone-outline' @click="callPho"> <i  ></i></button> 
+               <button :disabled='mobileCall ==""?true:false' type='button'  v-loading='callPhoLoading' class='callBtn el-icon-phone-outline' @click="callPho"> <i  ></i></button> 
 				    </el-form-item>
 				  </div>
 				  <el-row>
@@ -727,7 +727,7 @@ export default {
           { required: true, message: "请填写跟进内容", trigger: "change" }
         ],
           callerid:[
-            {required:true, message: '请输入话机ID', trigger: 'change' }
+            {required:true, message: '请输入话机ID', trigger: 'blur' }
           ]
       },
       layout: "total, prev, pager, next, jumper",
@@ -799,9 +799,10 @@ export default {
         this.$refs['callForm'].resetFields();
       },
       confirm_call(){ // 确认呼叫
-      this.saveFollow = true
+      
         this.$refs['callForm'].validate((valid) => {
           if (valid) {
+            this.saveFollow = true
             let params={
               crmApplayId:this.dialogFollow.crmApplayId,
               fixeNumber:this.fixeNumber,   //固定id  旧
