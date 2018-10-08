@@ -315,7 +315,33 @@
 			<!--贷后弹框--START-->
 			<el-dialog title="查看跟进" width='800px' center :visible.sync="dialogLoanEnd">
 			  <div class="dialogLoanEnd" style='margin-top: -25px;'>
-			  	  	<el-row>
+			  	  <el-row>
+			  		<div class="clearfix">
+	            <el-col :span="8">
+	              <el-col :span="7" >跟进形式：</el-col>
+	              <!--<el-col :span="17" >{{observeObj.followType}}</el-col>-->
+	              <el-col :span="17" v-if = 'observeObj.followType == "000021-0002"'>外访</el-col>
+	              <el-col :span="17" v-if = 'observeObj.followType == "000021-0003"'>电话</el-col>
+	            </el-col>
+	            <el-col :span="8" v-if = 'observeObj.followType == "000021-0002"'>
+	              <el-col :span="7" >地址类型：</el-col>
+	              <el-col :span="17" >{{observeObj.addressType}}</el-col>
+	            </el-col>
+	            
+            </div>
+            <div class="clearfix">
+            	<el-col :span="24" v-if = 'observeObj.followType == "000021-0002"'>
+	              <el-col :span="2.5" >详细地址：</el-col>
+	              <el-col :span="21.5" >
+	              	<div class="spanDis">						  	
+								  	<span>{{observeObj.addressProvince}}</span>
+								  	<span>{{observeObj.addressCity}}</span>
+								  	<span>{{observeObj.addressArea}}</span>
+								  	<span>{{observeObj.detailedAddress}}</span>						  	
+								  </div>
+	              </el-col>
+	            </el-col>
+            </div>
 						<div class="clearfix">
 	            <el-col :span="8">
 	              <el-col :span="7" >催收对象：</el-col>
@@ -332,8 +358,10 @@
             </div>
 						<div class="clearfix">
             	<el-col :span="8">
-	              <el-col :span="7" >电话状态：</el-col>
-	              <el-col :span="17" >{{observeObj.contactMobileStatus}}</el-col>
+	              <el-col :span="7" v-if = 'observeObj.followType == "000021-0003"'>电话状态：</el-col>
+	              <el-col :span="17" v-if = 'observeObj.followType == "000021-0003"'>{{observeObj.contactMobileStatus }}</el-col>
+	              <el-col :span="7" v-if = 'observeObj.followType == "000021-0002"'>地址状态：</el-col>
+	              <el-col :span="17" v-if = 'observeObj.followType == "000021-0002"' >{{observeObj.addressStatus}}</el-col>	             
 	            </el-col>
 	            <el-col :span="8">
 	              <el-col :span="7" >工作状态：</el-col>
@@ -379,7 +407,7 @@
 	            </el-col>
 	            <el-col :span="8" v-if="observeObj.collectionFeedback == 1">
 	              <el-col :span="7" >还款金额：</el-col>
-	              <el-col :span="17" >{{observeObj.repaymentAmount}}</el-col>
+	              <el-col :span="17" >{{observeObj.repaymentAmount}}元</el-col>
 	            </el-col>  
             </div>  						
 						<div class="clearfix">
@@ -465,7 +493,7 @@
 
           <el-row>
             <el-col :span="4" >跟进结果：</el-col>
-            <el-col :span="20" >{{observeObj.followupResult}}</el-col>
+            <el-col :span="20" >{{observeObj.followupResultMsg}}</el-col>
           </el-row>
           <br>
           <el-row>
@@ -1120,7 +1148,7 @@ import Pagination from '@/components/common/Pagination'
       }
     }
     .dialogLoanEnd .el-row div{
-      height:30px;
+      /*height:30px;*/
     }
 		.pagWrap {
 			margin-top: 10px;

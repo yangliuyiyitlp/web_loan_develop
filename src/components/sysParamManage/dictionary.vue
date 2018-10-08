@@ -218,7 +218,7 @@
 						      <el-input v-model.trim="detailForm.detailCode" auto-complete="off" :disabled='flagDetailCode' :maxlength='20'></el-input>
 						    </el-form-item>
 						    <el-form-item label="排序" :label-width="formLabelWidth" prop="index" >
-						      <el-input style='width:130px' v-model.trim="detailForm.index" auto-complete="off" :maxlength='20'></el-input>数字越大排序越前
+						      <el-input style='width:130px' v-model.trim="detailForm.index" auto-complete="off" :maxlength='20'></el-input>数字越小排序越前
 						    </el-form-item>
 					    </el-form>
 

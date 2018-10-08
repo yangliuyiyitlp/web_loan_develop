@@ -65,6 +65,7 @@
 		},
 		watch: {
 			$route() {
+				// debugger
 				if(this.$route.path == '/home') {
 					this.showHome = true
 					console.log(this.$route, 1233213213132)

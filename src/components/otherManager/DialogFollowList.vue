@@ -108,7 +108,7 @@
             </el-row><br>
             <el-row>
               <el-col :span="5" >地址是否异常：</el-col>
-              <el-col :span="19" >{{observeObj.comExceptionStatus == 0? '否' : '是'}}{{observeObj.comExceptionRemark}}</el-col>
+              <el-col :span="19" >{{observeObj.homeExceptionStatus == 0? '否' : '是'}}{{observeObj.homeExceptionRemark}}</el-col>
             </el-row><br>
             <el-row>
               <el-col :span="5" >上门回访公司地址：</el-col>
@@ -257,7 +257,7 @@
 
           <el-row>
             <el-col :span="4" >跟进结果：</el-col>
-            <el-col :span="20" >{{observeObj.followupResult}}</el-col>
+            <el-col :span="20" >{{observeObj.followupResultMsg}}</el-col>
           </el-row>
           <br>
           <el-row>

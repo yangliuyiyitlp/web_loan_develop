@@ -557,7 +557,7 @@
 
           <el-row>
             <el-col :span="4" >跟进结果：</el-col>
-            <el-col :span="20" >{{observeObj.followupResult}}</el-col>
+            <el-col :span="20" >{{observeObj.followupResultMsg}}</el-col>
           </el-row>
           <br>
           <el-row>

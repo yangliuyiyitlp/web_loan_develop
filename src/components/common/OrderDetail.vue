@@ -713,13 +713,14 @@ export default {
           } else if(res.data.msg=='暂无信息！'){
              this.total = 0
             this.examData = []
-          }else{
-            this.$notify({
-              title: "提示",
-              message: res.data.msg,
-              duration: 1500
-            });
           }
+          // else{
+          //   this.$notify({
+          //     title: "提示",
+          //     message: res.data.msg,
+          //     duration: 1500
+          //   });
+          // }
         });
     },
     queryRepaymentPlan() {
@@ -739,13 +740,14 @@ export default {
           }  else if(res.data.msg=='暂无信息！'){
              this.total2 = 0
             this.RepaymentPlan =[]
-          }else {
-            this.$notify({
-              title: "提示",
-              message: res.data.msg,
-              duration: 1500
-            });
           }
+          // else {
+          //   this.$notify({
+          //     title: "提示",
+          //     message: res.data.msg,
+          //     duration: 1500
+          //   });
+          // }
         });
     },
     queryPaymentHistory() {
@@ -765,13 +767,14 @@ export default {
           }   else if(res.data.msg=='暂无信息！'){
              this.total3 = 0
             this.PaymentHistory = []
-          }else {
-            this.$notify({
-              title: "提示",
-              message: res.data.msg,
-              duration: 1500
-            });
           }
+          // else {
+          //   this.$notify({
+          //     title: "提示",
+          //     message: res.data.msg,
+          //     duration: 1500
+          //   });
+          // }
         });
     },
     queryQueryOrderAmountt() {
@@ -858,13 +861,14 @@ export default {
           }   else if(res.data.msg=='暂无信息！'){
             this.userBaseInfo = {}
             this.jobNature = ''
-          } else {
-            this.$notify({
-              title: "提示",
-              message: res.data.msg,
-              duration: 1500
-            });
-          }
+          } 
+          // else {
+          //   this.$notify({
+          //     title: "提示",
+          //     message: res.data.msg,
+          //     duration: 1500
+          //   });
+          // }
         });
     },
     queryLinkManInfo() {
@@ -878,13 +882,14 @@ export default {
             this.linkInfo = res.data.data;
           }   else if(res.data.msg=='暂无信息！'){
             this.linkInfo = []
-          }  else {
-            this.$notify({
-              title: "提示",
-              message: res.data.msg,
-              duration: 1500
-            });
-          }
+          }  
+          // else {
+          //   this.$notify({
+          //     title: "提示",
+          //     message: res.data.msg,
+          //     duration: 1500
+          //   });
+          // }
         });
     },
     queryAccountInfo() {
@@ -898,13 +903,14 @@ export default {
             this.accoutInfo = res.data.data;
           }    else if(res.data.msg=='暂无信息！'){
             this.accoutInfo = {}
-          } else {
-            this.$notify({
-              title: "提示",
-              message: res.data.msg,
-              duration: 1500
-            });
-          }
+          } 
+          // else {
+          //   this.$notify({
+          //     title: "提示",
+          //     message: res.data.msg,
+          //     duration: 1500
+          //   });
+          // }
         });
     },
     tabClick(tab, even) {

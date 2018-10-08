@@ -247,8 +247,8 @@
 							<el-row>
 								<el-col :span="5">地址是否异常：</el-col>
 								<el-col :span="19">
-									<span class="common-space">{{observeObj.comExceptionStatus == 0? '否' : '是'}}</span>
-									<span class="common-space">{{observeObj.comExceptionRemark}}</span>
+									<span class="common-space">{{observeObj.homeExceptionStatus == 0? '否' : '是'}}</span>
+									<span class="common-space">{{observeObj.homeExceptionRemark}}</span>
 								</el-col>
 							</el-row><br>
 							<el-row>
@@ -314,7 +314,33 @@
       <el-dialog title="查看跟进内容" width='800px' center :visible.sync="dialogLoanEnd" :close-on-click-modal="false">
         <div class="dialogLoanEnd" style='margin-top: -25px;' v-loading="loadingDialog">
           <el-row>
-          	<div class="clearfix">
+			  		<div class="clearfix">
+	            <el-col :span="8">
+	              <el-col :span="7" >跟进形式：</el-col>
+	              <!--<el-col :span="17" >{{observeObj.followType}}</el-col>-->
+	              <el-col :span="17" v-if = 'observeObj.followType == "000021-0002"'>外访</el-col>
+	              <el-col :span="17" v-if = 'observeObj.followType == "000021-0003"'>电话</el-col>
+	            </el-col>
+	            <el-col :span="8" v-if = 'observeObj.followType == "000021-0002"'>
+	              <el-col :span="7" >地址类型：</el-col>
+	              <el-col :span="17" >{{observeObj.addressType}}</el-col>
+	            </el-col>
+	            
+            </div>
+            <div class="clearfix">
+            	<el-col :span="24" v-if = 'observeObj.followType == "000021-0002"'>
+	              <el-col :span="2.5" >详细地址：</el-col>
+	              <el-col :span="21.5" >
+	              	<div class="spanDis">						  	
+								  	<span>{{observeObj.addressProvince}}</span>
+								  	<span>{{observeObj.addressCity}}</span>
+								  	<span>{{observeObj.addressArea}}</span>
+								  	<span>{{observeObj.detailedAddress}}</span>						  	
+								  </div>
+	              </el-col>
+	            </el-col>
+            </div>
+						<div class="clearfix">
 	            <el-col :span="8">
 	              <el-col :span="7" >催收对象：</el-col>
 	              <el-col :span="17" >{{observeObj.receivingRelation}}</el-col>
@@ -328,11 +354,12 @@
 	              <el-col :span="17" >{{observeObj.receivingMobile}}</el-col>
 	            </el-col>
             </div>
-            
-            <div class="clearfix">
+						<div class="clearfix">
             	<el-col :span="8">
-	              <el-col :span="7" >电话状态：</el-col>
-	              <el-col :span="17" >{{observeObj.contactMobileStatus}}</el-col>
+	              <el-col :span="7" v-if = 'observeObj.followType == "000021-0003"'>电话状态：</el-col>
+	              <el-col :span="17" v-if = 'observeObj.followType == "000021-0003"'>{{observeObj.contactMobileStatus }}</el-col>
+	              <el-col :span="7" v-if = 'observeObj.followType == "000021-0002"'>地址状态：</el-col>
+	              <el-col :span="17" v-if = 'observeObj.followType == "000021-0002"' >{{observeObj.addressStatus}}</el-col>	             
 	            </el-col>
 	            <el-col :span="8">
 	              <el-col :span="7" >工作状态：</el-col>
@@ -340,11 +367,10 @@
 	            </el-col>
 	            <el-col :span="8">
 	              <el-col :span="9" >债务人状态：</el-col>
-	              <el-col :span="16" >{{observeObj.contactObligorStatus}}</el-col>
+	              <el-col :span="15" >{{observeObj.contactObligorStatus}}</el-col>
 	            </el-col>
-            </div>  
-           
-            <div class="clearfix">
+            </div> 	
+						<div class="clearfix">
             	<el-col :span="8">
 	              <el-col :span="7" >催收反馈：</el-col>
 	              <el-col :span="17" >
@@ -373,28 +399,28 @@
 	                <span v-if='observeObj.collectionFeedback == 4'>拒绝还款</span>
 	              </el-col>	
               </el-col>
-	            <el-col :span="8">
+	            <el-col :span="8" v-if="observeObj.collectionFeedback == 1">
 	              <el-col :span="7" >还款日期：</el-col>
 	              <el-col :span="17" >{{observeObj.repaymentDate}}</el-col>
 	            </el-col>
-	            <el-col :span="8">
+	            <el-col :span="8" v-if="observeObj.collectionFeedback == 1">
 	              <el-col :span="7" >还款金额：</el-col>
 	              <el-col :span="17" >{{observeObj.repaymentAmount}}元</el-col>
 	            </el-col>  
-            </div>       
-            <div class="clearfix">
+            </div>  						
+						<div class="clearfix">
               <div class="followW72">跟进情况：</div>
               <div class="followWW90">{{observeObj.followContent}}</div>              
             </div>
             <div class="clearfix">
-              <el-col :span="8" >预约跟进：</el-col>
-              <el-col :span="16" >{{observeObj.reminderTime}}</el-col>
+              <el-col class="followW72">预约跟进：</el-col>
+              <el-col class="followWW90">{{observeObj.reminderTime}}</el-col>
             </div>
             <div class="clearfix">
-              <el-col :span="3" >预约提醒：</el-col>
-              <el-col :span="21" >{{observeObj.reminderContent}}</el-col>
+              <el-col class="followW72">预约提醒：</el-col>
+              <el-col class="followWW90">{{observeObj.reminderContent}}</el-col>
             </div>
-          </el-row>
+					</el-row>
         </div>
       </el-dialog>
       <!--贷后弹框--END-->
@@ -494,7 +520,8 @@
             dialogFollowVisible: false,
             dialogButton:false,
             myOrderList:false,
-          dialogOpenRecord:false
+          	dialogOpenRecord:false,
+          	
           }
         }
       },
@@ -505,6 +532,7 @@
     },
     data () {
       return {
+      	row: {},
       	loadingDialog: false,
         layout:"total, prev, pager, next, jumper",
         followObj: [],
@@ -751,14 +779,17 @@
         this.pageSize1 = val
         this.pageNo1 = 1
         this.currentPage1 = 1
-        this.queryOpenRecord()
+        this.queryOpenRecord(this.row)
+        console.log(this.row,"this.dialogFollow.row")
       },
       handleCurrentChange1(val) {
         this.pageNo1 = val
         this.currentPage1 = val
-        this.queryOpenRecord()
+        this.queryOpenRecord(this.row)
+        console.log(this.row,"this.dialogFollow.row")
       },
       queryOpenRecord(row){ // 开户记录列表
+      	this.row = row
         api.CustomerAccountOpenRecord({
           pageNo:this.pageNo1,
           pageSize:this.pageSize1,
@@ -864,7 +895,7 @@
   	
     .dialogLoanEnd .el-row div {
       /*height:30px;*/
-     line-height: 1.5;
+     line-height: 2;
     }    
     .followW72 {
     	width: 72px;
@@ -874,6 +905,10 @@
     	width: 90%;
     	float: left;
     }
+    .clearfix {
+	    line-height: 2;
+		}
+		
     .miniList{
       bottom:0px;
       height:40px;

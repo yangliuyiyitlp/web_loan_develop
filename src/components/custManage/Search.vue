@@ -97,7 +97,8 @@
 	<div class="" id="tree" v-show='showTree'>
 		<el-dialog title="请选择" width='500px' :visible.sync="showTree" :close-on-click-modal="false">
 			<div class="a1">
-				<Tree :arrData='data' @handleNodeClick='handleNodeClick'></Tree>
+				<!--<Tree :arrData='data' @handleNodeClick='handleNodeClick'></Tree>-->
+				<el-tree :data="data"  node-key="id" :props="defaultProps" @node-click="handleNodeClick"></el-tree>
 			</div>
 		</el-dialog>
 	</div>
@@ -258,8 +259,8 @@ export default {
       //			ids2:'ids2',
       //	  		data: [],
       defaultProps: {
-        children: "child",
-        label: "name"
+        children: "children",
+        label: "title"
       },
       checkListName: ["未实名", "已实名", "已成交"], //客户状态:1未实名,2已实名,3已成交
       applyProvince: [],

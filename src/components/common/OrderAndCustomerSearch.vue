@@ -149,7 +149,8 @@
 	<div class="" id="tree" v-show='showTree'>
 		<el-dialog title="请选择" width='500px' :visible.sync="showTree">
 			<div class="a1">
-				<Tree :arrData='data' @handleNodeClick='handleNodeClick'></Tree>
+				<!--<Tree :arrData='data' @handleNodeClick='handleNodeClick'></Tree>-->
+				<el-tree :data="data" node-key="id" :props="defaultProps" @node-click="handleNodeClick"></el-tree>
 			</div>
 		</el-dialog>
 	</div>
@@ -271,7 +272,11 @@ export default {
         { code: 3, name: "视频签约" },
         { code: 4, name: "开户" }
       ],
-      innitCheckListNameCustomer: [1, 2, 3, 4]
+      innitCheckListNameCustomer: [1, 2, 3, 4],
+      defaultProps: {
+        children: "children",
+        label: "title"
+      },
     };
   },
   mounted() {

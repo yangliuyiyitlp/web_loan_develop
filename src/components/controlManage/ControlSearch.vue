@@ -117,7 +117,8 @@
 	<div class="" id="tree" v-show='showTree'>
 		<el-dialog title="请选择" width='500px' :visible.sync="showTree">
 			<div class="a1">
-				<Tree :arrData='data' @handleNodeClick='handleNodeClick'></Tree>
+				<!--<Tree :arrData='data' @handleNodeClick='handleNodeClick'></Tree>-->
+				<el-tree :data="data" node-key="id" :props="defaultProps" @node-click="handleNodeClick"></el-tree>
 			</div>
 		</el-dialog>
 	</div>
@@ -208,6 +209,10 @@ export default {
 	        //订单状态的'申请中'对应的订单环节
 	        orderNode_s1: [],
 	        orderNode_s2: [],
+	        defaultProps: {
+        children: "children",
+        label: "title"
+      },
         multipleSelectionIdList:''
 	  	}
 	},
@@ -597,7 +602,7 @@ export default {
 		    width: 200px;
 		}
 		.a1 {
-			    margin-top: -40px;
+			    /*margin-top: -40px;*/
 		}
 		/*.btn {
 			text-align: right;

@@ -110,7 +110,8 @@
 	<div class="" id="tree" v-show='showTree'>
 		<el-dialog title="请选择" width='500px' :visible.sync="showTree">
 			<div class="a1">
-				<Tree :arrData='data' @handleNodeClick='handleNodeClick'></Tree>
+				<!--<Tree :arrData='data' @handleNodeClick='handleNodeClick'></Tree>-->
+				<el-tree :data="data" node-key="id" :props="defaultProps" @node-click="handleNodeClick"></el-tree>
 			</div>
 		</el-dialog>
 	</div>
@@ -194,7 +195,11 @@ export default {
       productState1: [],
       productState2: [],
       //	        orderNode: [],
-      flagEmitSearchFn: true
+      flagEmitSearchFn: true,
+      defaultProps: {
+        children: "children",
+        label: "title"
+      },
     };
   },
   mounted() {
@@ -489,7 +494,7 @@ export default {
     /*width: 200px;*/
   }
   .a1 {
-    margin-top: -40px;
+    /*margin-top: -40px;*/
   }
   /*.btn {
 			text-align: right;

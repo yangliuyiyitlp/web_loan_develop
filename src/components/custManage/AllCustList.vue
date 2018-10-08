@@ -244,7 +244,7 @@ export default {
 		           duration: 1500
 		        });
 			}
-//			console.log(this.zTreeData,123)
+			console.log(this.zTreeData,123)
 		})
 	},
 	toTree(ary, data) {
